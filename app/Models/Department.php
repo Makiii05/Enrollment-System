@@ -12,7 +12,7 @@ class Department extends Model
         "status",
     ];
 
-    public function courses(){
-        return $this->hasMany(Course::class);
+    public function programs(){
+        return $this->hasMany(Program::class);
     }
 }

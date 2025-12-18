@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('prospectuses', function (Blueprint $table) {
-            $table->id(); // Primary key
+        Schema::create('semesters', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
-            $table->foreignId('curriculum_id')->nullable()->constrained('curricula')->nullOnDelete();
-            $table->foreignId('semester_id')->nullable()->constrained('semesters')->nullOnDelete();
-            $table->foreignId('subject_id')->nullable()->constrained('subjects')->nullOnDelete();
+            $table->text('code');
+            $table->text('description');
+            $table->text('academic_year');
+            $table->date('start_date');
+            $table->date('end_date');
             $table->string('status')->enum(['active', 'inactive'], "active");
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('prospectuses');
+        Schema::dropIfExists('semesters');
     }
 };
