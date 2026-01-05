@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id(); // Primary key
             $table->timestamps();
             $table->foreignId('curriculum_id')->nullable()->constrained('curricula')->nullOnDelete();
-            $table->foreignId('semester_id')->nullable()->constrained('semesters')->nullOnDelete();
+            $table->foreignId('academic_term_id')->nullable()->constrained('academic_terms')->nullOnDelete();
+            $table->foreignId('level_id')->nullable()->constrained('levels')->nullOnDelete();
             $table->foreignId('subject_id')->nullable()->constrained('subjects')->nullOnDelete();
             $table->string('status')->enum(['active', 'inactive'], "active");
         });

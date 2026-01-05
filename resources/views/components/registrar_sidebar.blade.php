@@ -61,6 +61,16 @@
             </li>
             <!-- List item -->
             <li>
+              <a href="{{ route('registrar.level') }}" class="is-drawer-close:tooltip my-2 is-drawer-close:tooltip-right" data-tip="Levels">
+                <!-- Home icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
+                </svg>
+                <span class="is-drawer-close:hidden">Levels</span>
+              </a>
+            </li>
+            <!-- List item -->
+            <li>
               <a href="{{ route('registrar.curriculum') }}" class="is-drawer-close:tooltip my-2 is-drawer-close:tooltip-right" data-tip="Curricula">
                 <!-- Settings icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
@@ -71,12 +81,12 @@
             </li>
             <!-- List item -->
             <li>
-              <a href="{{ route('registrar.semester') }}" class="is-drawer-close:tooltip my-2 is-drawer-close:tooltip-right" data-tip="Semesters">
+              <a href="{{ route('registrar.academic_term') }}" class="is-drawer-close:tooltip my-2 is-drawer-close:tooltip-right" data-tip="Academic Terms">
                 <!-- Home icon -->
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                 </svg>
-                <span class="is-drawer-close:hidden">Semesters</span>
+                <span class="is-drawer-close:hidden">Academic Terms</span>
               </a>
             </li>
             <!-- List item -->
@@ -100,6 +110,18 @@
               </a>
             </li>
           </ul>
+          <!-- Logout button -->
+          <div class="w-full p-2">
+            <form action="{{ route('registrar.logout') }}" method="POST">
+              @csrf
+              <button type="submit" class="btn btn-ghost w-full justify-start is-drawer-close:justify-center is-drawer-close:tooltip my-2 is-drawer-close:tooltip-right">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                </svg>
+                <span class="is-drawer-close:hidden">Logout</span>
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

@@ -4,30 +4,30 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Curriculum;
-use App\Models\Program;
+use App\Models\Department;
 
 class CurriculumController extends Controller
 {
     //
     public function showCurriculum(){
         $curricula = Curriculum::orderBy("created_at", "asc")->orderBy("status", "asc")->paginate(10);
-        $programs = Program::orderBy("created_at", "asc")->get();
+        $departments = Department::orderBy("created_at", "asc")->get();
         return view('registrar.curriculum', [
             'curricula' => $curricula,
-            'programs' => $programs,
+            'departments' => $departments,
         ]);
     }
     
     public function createCurriculum(Request $request){
         $request->validate([
             'curriculum' => 'required|string|max:255',
-            'program' => 'required|integer|exists:programs,id',
+            'department' => 'required|integer|exists:departments,id',
             'status' => 'required|in:active,inactive',
         ]);
 
         Curriculum::create([
             'curriculum' => $request->curriculum,
-            'program_id' => $request->program,
+            'department_id' => $request->department,
             'status' => $request->status,
         ]);
 
@@ -39,13 +39,13 @@ class CurriculumController extends Controller
         
         $request->validate([
             'curriculum' => 'required|string|max:255',
-            'program' => 'required|integer|exists:programs,id',
+            'department' => 'required|integer|exists:departments,id',
             'status' => 'required|in:active,inactive',
         ]);
 
         $curriculum->update([
             'curriculum' => $request->curriculum,
-            'program_id' => $request->program,
+            'department_id' => $request->department,
             'status' => $request->status,
         ]);
 

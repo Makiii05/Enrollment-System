@@ -26,11 +26,11 @@
 
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Program</span>
+                        <span class="label-text">Department</span>
                     </label>
-                    <select name="program" class="select select-bordered w-full" required>
-                        @foreach ($programs as $program)
-                        <option value="{{ $program->id }}">{{ $program->code }} - {{ $program->description }}</option>
+                    <select name="department" class="select select-bordered w-full" required>
+                        @foreach ($departments as $department)
+                        <option value="{{ $department->id }}">{{ $department->code }} - {{ $department->description }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -60,7 +60,7 @@
                 <tr>
                     <th></th>
                     <th>Curriculum</th>
-                    <th>Program</th>
+                    <th>Department</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -70,10 +70,10 @@
                 <tr>
                     <td>{{$curriculum->id}}</td>
                     <td>{{$curriculum->curriculum}}</td>
-                    <td>{{$curriculum->program->code}}</td>
+                    <td>{{$curriculum->department->code}}</td>
                     <td>{{$curriculum->status}}</td>
                     <td>
-                        <button class="text-green-600 hover:underline" onclick="editCurriculum({{ $curriculum->id }}, '{{ $curriculum->curriculum }}', {{ $curriculum->program_id }}, '{{ $curriculum->status }}')">edit</button>
+                        <button class="text-green-600 hover:underline" onclick="editCurriculum({{ $curriculum->id }}, '{{ $curriculum->curriculum }}', {{ $curriculum->department_id }}, '{{ $curriculum->status }}')" >edit</button>
                         <form action="{{ route('registrar.curriculum.delete', $curriculum->id) }}" method="POST" style="display:inline;">
                             @csrf
                             <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Are you sure?')">delete</button>
@@ -89,10 +89,10 @@
     </div>
     
     <script>
-        function editCurriculum(id, curriculum, programId, status) {
-            let progOptions = `
-                @foreach ($programs as $program)
-                <option value="{{ $program->id }}" ${programId === {{ $program->id }} ? 'selected' : ''}>{{ $program->code }} - {{ $program->description }}</option>
+        function editCurriculum(id, curriculum, departmentId, status) {
+            let deptOptions = `
+                @foreach ($departments as $department)
+                <option value="{{ $department->id }}" ${departmentId === {{ $department->id }} ? 'selected' : ''}>{{ $department->code }} - {{ $department->description }}</option>
                 @endforeach
             `;
             
@@ -114,10 +114,10 @@
 
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Program</span>
+                                <span class="label-text">Department</span>
                             </label>
-                            <select name="program" class="select select-bordered w-full" required>
-                                ${progOptions}
+                            <select name="department" class="select select-bordered w-full" required>
+                                ${deptOptions}
                             </select>
                         </div>
 

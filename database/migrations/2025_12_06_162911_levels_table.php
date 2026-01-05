@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('curricula', function (Blueprint $table) {
-            $table->id(); // Primary key
+        Schema::create('levels', function (Blueprint $table) {
+            $table->id();
             $table->timestamps();
-            $table->text('curriculum');
-            $table->string('status')->enum(['active', 'inactive'], "active");
-            $table->foreignId('department_id')->constrained('departments')->onDelete('cascade');
+            $table->text('code');
+            $table->text('description');
+            $table->foreignId('program_id')->constrained('programs')->onDelete('cascade');
+            $table->integer('order')->default(0);
         });
     }
 
@@ -25,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('levels');
     }
 };

@@ -35,14 +35,14 @@
                     <label class="label">
                         <span class="label-text">Unit</span>
                     </label>
-                    <input type="number" name="unit" class="input input-bordered w-full" placeholder="Enter subject unit" required>
+                    <input type="number" step="0.01" name="unit" class="input input-bordered w-full" placeholder="Enter subject unit" required>
                 </div>
 
                 <div class="form-control">
                     <label class="label">
                         <span class="label-text">Lecture Hour</span>
                     </label>
-                    <input type="number" name="lech" class="input input-bordered w-full" placeholder="Enter lecture hour" required>
+                    <input type="number" step="0.01" name="lech" class="input input-bordered w-full" placeholder="Enter lecture hour" required>
                 </div>
 
 
@@ -50,7 +50,7 @@
                     <label class="label">
                         <span class="label-text">Lecture Unit</span>
                     </label>
-                    <input type="number" name="lecu" class="input input-bordered w-full" placeholder="Enter lecture unit" required>
+                    <input type="number" step="0.01" name="lecu" class="input input-bordered w-full" placeholder="Enter lecture unit" required>
                 </div>
 
 
@@ -58,7 +58,7 @@
                     <label class="label">
                         <span class="label-text">Laboratory Hour</span>
                     </label>
-                    <input type="number" name="labh" class="input input-bordered w-full" placeholder="Enter laboratory hour" required>
+                    <input type="number" step="0.01" name="labh" class="input input-bordered w-full" placeholder="Enter laboratory hour" required>
                 </div>
 
 
@@ -66,7 +66,7 @@
                     <label class="label">
                         <span class="label-text">Laboratory Unit</span>
                     </label>
-                    <input type="number" name="labu" class="input input-bordered w-full" placeholder="Enter laboratory unit" required>
+                    <input type="number" step="0.01" name="labu" class="input input-bordered w-full" placeholder="Enter laboratory unit" required>
                 </div>
 
                 <div class="form-control col-span-2">
@@ -174,35 +174,35 @@
                             <label class="label">
                                 <span class="label-text">Unit</span>
                             </label>
-                            <input type="number" name="unit" class="input input-bordered w-full" value="${unit}" required>
+                            <input type="number" step="0.01" name="unit" class="input input-bordered w-full" value="${unit}" required>
                         </div>
 
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">Lecture Hour</span>
                             </label>
-                            <input type="number" name="lech" class="input input-bordered w-full" value="${lech}" required>
+                            <input type="number" step="0.01" name="lech" class="input input-bordered w-full" value="${lech}" required>
                         </div>
 
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">Lecture Unit</span>
                             </label>
-                            <input type="number" name="lecu" class="input input-bordered w-full" value="${lecu}" required>
+                            <input type="number" step="0.01" name="lecu" class="input input-bordered w-full" value="${lecu}" required>
                         </div>
 
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">Laboratory Hour</span>
                             </label>
-                            <input type="number" name="labh" class="input input-bordered w-full" value="${labh}" required>
+                            <input type="number" step="0.01" name="labh" class="input input-bordered w-full" value="${labh}" required>
                         </div>
 
                         <div class="form-control">
                             <label class="label">
                                 <span class="label-text">Laboratory Unit</span>
                             </label>
-                            <input type="number" name="labu" class="input input-bordered w-full" value="${labu}" required>
+                            <input type="number" step="0.01" name="labu" class="input input-bordered w-full" value="${labu}" required>
                         </div>
 
                         <div class="form-control col-span-2">

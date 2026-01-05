@@ -11,17 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('academic_terms', function (Blueprint $table) {
+        Schema::create('fees', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->text('code');
             $table->text('description');
-            $table->string('type')->default('semester'); // 'semester' or 'full year'
-            $table->foreignId('department_id')->nullable()->constrained('departments')->onDelete('cascade');
+            $table->decimal('amount', 8, 2);
+            $table->text('type')->nullable();
+            $table->float('month_to_pay')->nullable();
+            $table->text('group');
             $table->text('academic_year');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->string('status')->enum(['active', 'inactive'], "active");
+            $table->foreignId('program_id')->constrained('programs')->onDelete('cascade');
         });
     }
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('academic_terms');
+        //
     }
 };

@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
+
+class AccountingController extends Controller
+{
+    public function showLogin(){
+        return view('accounting.login');
+    }
+
+    public function login(Request $request){
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        if(Auth::attempt($validated)){
+            $request->session()->regenerate();
+            $user = auth()->user(); 
+            return redirect()->route('accounting.fee');
+        }
+        throw ValidationException::withMessages([
+            'email' => 'These credentials do not match our records.',
+        ]);
+    }
+
+    public function logout(Request $request){
+        Auth::logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('accounting.login');
+    }
+
+    public function showDashboard(){
+        return view('accounting.dashboard');
+    }
+}

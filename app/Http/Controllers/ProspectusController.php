@@ -5,86 +5,94 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Prospectus;
 use App\Models\Curriculum;
-use App\Models\Semester;
+use App\Models\AcademicTerm;
 use App\Models\Subject;
-use App\Models\Program;
+use App\Models\Level;
+use App\Models\Department;
 
 class ProspectusController extends Controller
 {
     //
     public function showProspectus(){
         $curricula = Curriculum::where('status', 'active')->orderBy("created_at", "asc")->get();
-        $semesters = Semester::where('status', 'active')->orderBy("created_at", "asc")->get();
+        $academicTerms = AcademicTerm::where('status', 'active')->orderBy("created_at", "asc")->get();
         $subjects = Subject::where('status', 'active')->orderBy("created_at", "asc")->get();
-        $programs = Program::where('status', 'active')->orderBy("created_at", "asc")->get();
+        $departments = Department::where('status', 'active')->orderBy("created_at", "asc")->get();
+        $levels = Level::whereHas('program', function ($query) use ($departments) {
+                $query->where('department_id', $departments->first()->id);
+            })->orderBy("order", "asc")->get();
         
         return view('registrar.prospectus', [
             'curricula' => $curricula,
-            'semesters' => $semesters,
+            'academicTerms' => $academicTerms,
             'subjects' => $subjects,
-            'programs' => $programs,
+            'departments' => $departments,
+            'levels' => $levels,
         ]);
     }
 
     public function searchProspectus(Request $request){
-        // validate
         $request->validate([
-            'program' => 'required|string|max:255',
+            'department' => 'required|string|max:255',
             'academic_year' => 'required|string|max:255',
         ]);
-        // assign
-        $program = $request->program;
+
+        $department = $request->department;
         $academic_year = $request->academic_year;
-        // query
-        $prospectuses = Prospectus::whereHas('curriculum', function ($query) use ($program) {
-            $query->where('program_id', $program);
-        })->whereHas('semester', function ($query) use ($academic_year) {
-            $query->where('academic_year', $academic_year);
-        })
-        ->with('curriculum', 'semester', 'subject')
-        ->get();
 
+        $prospectuses = Prospectus::where('status', 'active')
+            ->whereHas('curriculum', function ($query) use ($department) {
+                $query->where('department_id', $department);
+            })
+            ->whereHas('academicTerm', function ($query) use ($academic_year) {
+                $query->where('academic_year', $academic_year);
+            })
+            ->with(['curriculum.department', 'academicTerm', 'level', 'subject'])
+            ->orderBy("created_at", "asc")
+            ->get();
         $curricula = Curriculum::where('status', 'active')->orderBy("created_at", "asc")->get();
-        $semesters = Semester::where('status', 'active')->orderBy("created_at", "asc")->get();
+        $academicTerms = AcademicTerm::where('status', 'active')->orderBy("created_at", "asc")->get();
         $subjects = Subject::where('status', 'active')->orderBy("created_at", "asc")->get();
-        $programs = Program::where('status', 'active')->orderBy("created_at", "asc")->get();
-
+        $departments = Department::where('status', 'active')->orderBy("created_at", "asc")->get();
+        $levels = Level::whereHas('program', function ($query) use ($departments) {
+                $query->where('department_id', $departments->first()->id);
+            })->orderBy("order", "asc")->get();
+        
         return view('registrar.prospectus', [
             'prospectuses' => $prospectuses,
             'curricula' => $curricula,
-            'semesters' => $semesters,
+            'academicTerms' => $academicTerms,
             'subjects' => $subjects,
-            'programs' => $programs,
-            'old_program' => $program,
+            'departments' => $departments,
+            'levels' => $levels,
+            'old_department' => $department,
             'old_academic_year' => $academic_year,
         ]);
     }
     
-    public function insertProspectus(Request $request){
-        // Validate the request
+    public function createProspectus(Request $request){
         $validated = $request->validate([
             'curriculum' => 'required|exists:curricula,id',
-            'semester' => 'required|exists:semesters,id',
+            'academic_term' => 'required|exists:academic_terms,id',
+            'level' => 'required|exists:levels,id',
             'subject' => 'required|exists:subjects,id',
             'status' => 'required|in:active,inactive',
         ]);
 
-        // Create the prospectus
         $prospectus = Prospectus::create([
             'curriculum_id' => $validated['curriculum'],
-            'semester_id' => $validated['semester'],
+            'academic_term_id' => $validated['academic_term'],
+            'level_id' => $validated['level'],
             'subject_id' => $validated['subject'],
             'status' => $validated['status'],
         ]);
 
-        // Get the curriculum and semester to extract program and academic_year
-        $curriculum = Curriculum::find($validated['curriculum']);
-        $semester = Semester::find($validated['semester']);
+        $prospectus->load(['curriculum.department', 'academicTerm.department', 'level.program', 'subject']);
 
-        // Redirect to searchProspectus with program and academic_year
-        return redirect()->route('registrar.prospectus.search', [
-            'program' => $curriculum->program_id,
-            'academic_year' => $semester->academic_year,
+        return response()->json([
+            'success' => true,
+            'message' => 'Prospectus created successfully',
+            'prospectus' => $prospectus
         ]);
     }
 
@@ -93,40 +101,88 @@ class ProspectusController extends Controller
         
         $validated = $request->validate([
             'curriculum' => 'required|exists:curricula,id',
-            'semester' => 'required|exists:semesters,id',
+            'academic_term' => 'required|exists:academic_terms,id',
+            'level' => 'required|exists:levels,id',
             'subject' => 'required|exists:subjects,id',
             'status' => 'required|in:active,inactive',
         ]);
 
         $prospectus->update([
             'curriculum_id' => $validated['curriculum'],
-            'semester_id' => $validated['semester'],
+            'academic_term_id' => $validated['academic_term'],
+            'level_id' => $validated['level'],
             'subject_id' => $validated['subject'],
             'status' => $validated['status'],
         ]);
 
-        // Get the curriculum and semester to extract program and academic_year
-        $curriculum = Curriculum::find($validated['curriculum']);
-        $semester = Semester::find($validated['semester']);
+        $prospectus->load(['curriculum.department', 'academicTerm.department', 'level.program', 'subject']);
 
-        return redirect()->route('registrar.prospectus.search', [
-            'program' => $curriculum->program_id,
-            'academic_year' => $semester->academic_year,
-        ])->with('success', 'Prospectus updated successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Prospectus updated successfully',
+            'prospectus' => $prospectus
+        ]);
     }
 
     public function deleteProspectus($id){
         $prospectus = Prospectus::findOrFail($id);
-        
-        // Store the program and academic year before deleting
-        $curriculum = $prospectus->curriculum;
-        $semester = $prospectus->semester;
-        
         $prospectus->delete();
 
-        return redirect()->route('registrar.prospectus.search', [
-            'program' => $curriculum->program_id,
-            'academic_year' => $semester->academic_year,
-        ])->with('success', 'Prospectus deleted successfully');
+        return response()->json([
+            'success' => true,
+            'message' => 'Prospectus deleted successfully'
+        ]);
+    }
+
+    public function getLevelsByDepartment($departmentId)
+    {
+        $levels = Level::whereHas('program', function ($query) use ($departmentId) {
+                $query->where('department_id', $departmentId);
+            })
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json($levels);
+    }
+
+    public function getProspectusesApi(Request $request)
+    {
+        $request->validate([
+            'department' => 'required|string|max:255',
+            'academic_year' => 'required|string|max:255',
+        ]);
+
+        $department = $request->department;
+        $academic_year = $request->academic_year;
+
+        $prospectuses = Prospectus::where('status', 'active')
+            ->whereHas('curriculum', function ($query) use ($department) {
+                $query->where('department_id', $department);
+            })
+            ->whereHas('academicTerm', function ($query) use ($academic_year) {
+                $query->where('academic_year', $academic_year);
+            })
+            ->with(['curriculum.department', 'academicTerm.department', 'level.program', 'subject'])
+            ->orderBy("created_at", "asc")
+            ->get();
+
+        // Group by academic_term_id, then by level_id
+        $grouped = $prospectuses->groupBy('academic_term_id')->map(function ($termGroup) {
+            return [
+                'academic_term' => $termGroup->first()->academicTerm,
+                'levels' => $termGroup->groupBy('level_id')->map(function ($levelGroup) {
+                    return [
+                        'level' => $levelGroup->first()->level,
+                        'prospectuses' => $levelGroup->values()
+                    ];
+                })->values()
+            ];
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $grouped,
+            'count' => $prospectuses->count()
+        ]);
     }
 }

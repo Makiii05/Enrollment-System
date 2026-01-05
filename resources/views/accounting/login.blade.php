@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Login</title>
+    <title>Accounting Login</title>
     @vite('resources/css/app.css')
 </head>
 
@@ -12,12 +12,12 @@
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
                 <h2 class="card-title justify-center text-2xl font-bold">
-                    Registrar Login
+                    Accounting Login
                 </h2>
                 <p class="text-center text-sm text-gray-500 mb-4">
                     Sign in to continue
                 </p>
-                <form class="space-y-4" method="POST" action="{{ route('registrar.login.submit') }}">
+                <form class="space-y-4" method="POST" action="{{ route('accounting.login.submit') }}">
                     @csrf
                     <div class="form-control">
                         <label class="label">
@@ -52,4 +52,3 @@
     </div>
 </body>
 </html>
-    
