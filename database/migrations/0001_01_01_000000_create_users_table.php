@@ -18,6 +18,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('type');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
@@ -29,6 +30,7 @@ return new class extends Migration
             [
                 'name' => 'Registrar',
                 'email' => 'registrar@gmail.com',
+                'type' => 'registrar',
                 'password' => Hash::make('registrar123'),
                 'email_verified_at' => now(),
                 'created_at' => now(),
@@ -37,6 +39,7 @@ return new class extends Migration
             [
                 'name' => 'Accounting',
                 'email' => 'accounting@gmail.com',
+                'type' => 'accounting',
                 'password' => Hash::make('accounting123'),
                 'email_verified_at' => now(),
                 'created_at' => now(),

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,5 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         URL::forceScheme('http');
+
+        Gate::define('access-registrar', fn($user) => $user->type === 'registrar');
+        Gate::define('access-accounting', fn($user) => $user->type === 'accounting');
     }
 }

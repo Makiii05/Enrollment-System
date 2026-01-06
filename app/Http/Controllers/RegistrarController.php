@@ -22,8 +22,17 @@ class RegistrarController extends Controller
 
         if(Auth::attempt($validated)){
             $request->session()->regenerate();
-            $user = auth()->user(); 
-            return redirect()->route('registrar.dashboard');
+            $user = auth()->user();
+            if ($user && isset($user->type) && $user->type === 'registrar') {
+                return redirect()->route('registrar.dashboard');
+            } else {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+                throw ValidationException::withMessages([
+                    'email' => 'You are not authorized as a registrar.',
+                ]);
+            }
         }
         throw ValidationException::withMessages([
             'email' => 'These credentials do not match our records.',

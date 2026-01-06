@@ -8,7 +8,7 @@
         <form action="{{ route('accounting.fee.search') }}" method="POST" class="grow flex gap-2 items-end">
             @csrf
             <select name="program" class="select select-bordered" required>
-                <option value="">--Select Grade Level--</option>
+                <option value="">--Select Program--</option>
                 @foreach ($programs as $program)
                 <option value="{{ $program->id }}" @if(isset($old_program) && $old_program == $program->id) selected @endif>{{ $program->description }}</option>
                 @endforeach

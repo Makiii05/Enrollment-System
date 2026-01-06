@@ -12,14 +12,23 @@ use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\FeeController;
 use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\ApplicantController;
+
+Route::get('/', function () {return view('index');})->name('index');
+
+Route::prefix('application')->name('applicant.')->group(function () {
+    Route::get('/', [ApplicantController::class, 'showApplication'])->name('form');
+    Route::post('/', [ApplicantController::class, 'createApplication'])->name('create');
+    Route::post('/{id}/update', [ApplicantController::class, 'updateApplication'])->name('update');
+});
 
 Route::prefix('registrar')->name('registrar.')->group(function () {
     Route::get('/', [RegistrarController::class, 'showLogin'])->name('login');
     Route::post('/login', [RegistrarController::class, 'login'])->name('login.submit');
     Route::post('/logout', [RegistrarController::class, 'logout'])->name('logout');
 
-    // Protected routes - require authentication
-    Route::middleware('auth')->group(function () {
+    // Protected routes - require authentication and registrar type
+    Route::middleware(['auth', 'can:access-registrar'])->group(function () {
         Route::get('/dashboard', [RegistrarController::class, 'showDashboard'])->name('dashboard');
 
         Route::get('/departments', [DepartmentController::class, 'showDepartment'])->name('department');
@@ -69,8 +78,8 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
     Route::post('/login', [AccountingController::class, 'login'])->name('login.submit');
     Route::post('/logout', [AccountingController::class, 'logout'])->name('logout');
 
-    // Protected routes - require authentication
-    Route::middleware('auth')->group(function () {
+    // Protected routes - require authentication and accounting type
+    Route::middleware(['auth', 'can:access-accounting'])->group(function () {
         Route::get('/fee', [FeeController::class, 'showFees'])->name('fee');
         Route::match(['get', 'post'], '/fee/search', [FeeController::class, 'searchFee'])->name('fee.search');
         Route::post('/fee', [FeeController::class, 'createFee'])->name('fee.create');
