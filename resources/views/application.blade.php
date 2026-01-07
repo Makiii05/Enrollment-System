@@ -12,6 +12,7 @@
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="border-b border-gray-200 px-6 py-3">
                     <h4 class="text-gray-800 font-semibold">Application No.</h4>
+                    <p>Note: <small class="underline text-red-500">Use similar email to resubmit/edit existing application.</small> </p>
                 </div>
                 <div class="p-6 grid grid-cols-12 gap-4">
                     <div class="form-control col-span-4">
@@ -27,14 +28,14 @@
                 <div class="p-6 grid grid-cols-12 gap-4">
                     <div class="form-control col-span-3">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Level</label>
-                        <select name="level" class="select select-bordered w-full bg-white" required>
+                        <select id="level" name="level" class="select select-bordered w-full bg-white" required>
                             <option value="">-- Select Level --</option>
-                            <option value="nursery">Nursery</option>
-                            <option value="kindergarten">Kindergarten</option>
-                            <option value="grade school">Grade School</option>
-                            <option value="junior high school">Junior High School</option>
-                            <option value="senior high school">Senior High School</option>
-                            <option value="college">College</option>
+                            <option value="Nursery">Nursery</option>
+                            <option value="Kindergarten">Kindergarten</option>
+                            <option value="Grade School">Grade School</option>
+                            <option value="Junior High School">Junior High School</option>
+                            <option value="Senior High School">Senior High School</option>
+                            <option value="College">College</option>
                         </select>
                     </div>
                     <div class="form-control col-span-3">
@@ -47,32 +48,52 @@
                     </div>
                     <div class="form-control col-span-3">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Year Level</label>
-                        <select name="year_level" class="select select-bordered w-full bg-white" required>
+                        <select id="year_level" name="year_level" class="select select-bordered w-full bg-white" required>
                             <option value="">-- Select Year --</option>
+                            @foreach ($levels as $level)
+                            <option value="{{$level->description}}" data-program="{{$level->program->description}}" data-department="{{$level->program->department->description}}">{{$level->description}}</option>
+                            @endforeach
+                            <option value="1st Year" data-program="College">1st Year</option>
+                            <option value="2nd Year" data-program="College">2nd Year</option>
+                            <option value="3rd Year" data-program="College">3rd Year</option>
+                            <option value="4th Year" data-program="College">4th Year</option>
+                            <option value="5th Year" data-program="College">5th Year</option>
                         </select>
                     </div>
                     <div class="form-control col-span-3">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Strand</label>
-                        <select name="strand" class="select select-bordered w-full bg-white" required>
+                        <select id="strand" name="strand" class="select select-bordered w-full bg-white" required>
                             <option value="">-- Select Strand --</option>
+                            @foreach ($strands as $strand)
+                            <option value="{{$strand->id}}"><b>{{$strand->code}}</b>-{{$strand->description}}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">First Choice Program</label>
-                        <select name="first_program_choice" class="select select-bordered w-full bg-white" required>
+                        <select id="first_program_choice" name="first_program_choice" class="select select-bordered w-full bg-white" required>
                             <option value="">-- Select Program --</option>
+                            @foreach ($college_programs as $program)
+                            <option value="{{$program->id}}"><b>{{$program->code}}</b>-{{$program->description}}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Second Choice Program</label>
-                        <select name="second_program_choice" class="select select-bordered w-full bg-white" required>
+                        <select id="second_program_choice" name="second_program_choice" class="select select-bordered w-full bg-white" required>
                             <option value="">-- Select Program --</option>
+                            @foreach ($college_programs as $program)
+                            <option value="{{$program->id}}"><b>{{$program->code}}</b>-{{$program->description}}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Third Choice Program</label>
-                        <select name="third_program_choice" class="select select-bordered w-full bg-white" required>
+                        <select id="third_program_choice" name="third_program_choice" class="select select-bordered w-full bg-white" required>
                             <option value="">-- Select Program --</option>
+                            @foreach ($college_programs as $program)
+                            <option value="{{$program->id}}"><b>{{$program->code}}</b>-{{$program->description}}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>
@@ -205,6 +226,7 @@
             <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                 <div class="border-b border-gray-200 px-6 py-3">
                     <h4 class="text-gray-800 font-semibold">Educational Background</h4>
+                    <small class="underline text-red-500">Enter N/A if not applicable.</small>
                 </div>
                 <div class="p-6">
                     <!-- Header Row -->
@@ -253,3 +275,60 @@
         </form>
     </div>
 </x-layout>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const levelSelect = document.getElementById('level');
+        const yearLevelSelect = document.getElementById('year_level');
+        const strandSelect = document.getElementById('strand');
+        const firstProgramChoiceSelect = document.getElementById('first_program_choice');
+        const secondProgramChoiceSelect = document.getElementById('second_program_choice');
+        const thirdProgramChoiceSelect = document.getElementById('third_program_choice');
+
+        yearLevelSelect.parentElement.style.display = 'none';
+        strandSelect.parentElement.style.display = 'none';
+        firstProgramChoiceSelect.parentElement.style.display = 'none';
+        secondProgramChoiceSelect.parentElement.style.display = 'none';
+        thirdProgramChoiceSelect.parentElement.style.display = 'none';
+        for (let option of yearLevelSelect.options) {
+            option.style.display = 'none';
+        }
+
+        levelSelect.addEventListener('change', function () {
+            const selectedLevel = this.value;
+
+            // Reset visibility
+            yearLevelSelect.parentElement.style.display = 'none';
+            strandSelect.parentElement.style.display = 'none';
+            firstProgramChoiceSelect.parentElement.style.display = 'none';
+            secondProgramChoiceSelect.parentElement.style.display = 'none';
+            thirdProgramChoiceSelect.parentElement.style.display = 'none';
+            yearLevelSelect.value = '';
+            strandSelect.value = '';
+            firstProgramChoiceSelect.value = '';
+            secondProgramChoiceSelect.value = '';
+            thirdProgramChoiceSelect.value = '';
+            for (let option of yearLevelSelect.options) {
+                option.style.display = 'none';
+            }
+
+            yearLevelSelect.parentElement.style.display = 'block';
+            for (let option of yearLevelSelect.options) {
+                if (option.getAttribute('data-program') === `${selectedLevel}` || option.getAttribute('data-department') === `${selectedLevel}`) {
+                    option.style.display = 'block';
+                } else {
+                    option.style.display = 'none';
+                }
+            }
+
+            if (selectedLevel === "Senior High School") {
+                strandSelect.parentElement.style.display = 'block';
+            } else if (selectedLevel === 'College') {
+                firstProgramChoiceSelect.parentElement.style.display = 'block';
+                secondProgramChoiceSelect.parentElement.style.display = 'block';
+                thirdProgramChoiceSelect.parentElement.style.display = 'block';
+            }
+        });
+
+    });
+</script>
