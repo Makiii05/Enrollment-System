@@ -19,7 +19,6 @@ Route::get('/', function () {return view('index');})->name('index');
 Route::prefix('application')->name('applicant.')->group(function () {
     Route::get('/', [ApplicantController::class, 'showApplication'])->name('form');
     Route::post('/', [ApplicantController::class, 'createApplication'])->name('create');
-    Route::post('/{id}/update', [ApplicantController::class, 'updateApplication'])->name('update');
 });
 
 Route::prefix('registrar')->name('registrar.')->group(function () {

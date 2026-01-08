@@ -1,9 +1,22 @@
 <x-layout>
+    @include('partials.success-notification')
     <div class="w-full p-6 max-w-7xl mx-auto">
         <div class="mb-6">
             <h3 class="text-2xl font-bold text-gray-800">Submit Application</h3>
             <p class="text-gray-500 text-sm mt-1">Please fill out all required fields to complete your application.</p>
         </div>
+
+        {{-- Validation Errors Display --}}
+        @if ($errors->any())
+            <div class="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-6">
+                <h4 class="font-bold mb-2">Please fix the following errors:</h4>
+                <ul class="list-disc list-inside text-sm">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
         
         <form action="{{ route('applicant.create') }}" method="POST" class="space-y-6">
             @csrf
@@ -16,7 +29,7 @@
                 </div>
                 <div class="p-6 grid grid-cols-12 gap-4">
                     <div class="form-control col-span-4">
-                        <input type="text" readonly name="application_no" class="input input-bordered w-full bg-white" placeholder="Enter application number" value="00000000000" required>
+                        <input type="text" readonly id="application_no" name="application_no" class="input input-bordered w-full bg-white font-mono font-bold text-green-600" placeholder="Auto-generated" value="" required>
                     </div>
                 </div>
             </div>
@@ -62,7 +75,7 @@
                     </div>
                     <div class="form-control col-span-3">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Strand</label>
-                        <select id="strand" name="strand" class="select select-bordered w-full bg-white" required>
+                        <select id="strand" name="strand" class="select select-bordered w-full bg-white">
                             <option value="">-- Select Strand --</option>
                             @foreach ($strands as $strand)
                             <option value="{{$strand->id}}"><b>{{$strand->code}}</b>-{{$strand->description}}</option>
@@ -71,7 +84,7 @@
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">First Choice Program</label>
-                        <select id="first_program_choice" name="first_program_choice" class="select select-bordered w-full bg-white" required>
+                        <select id="first_program_choice" name="first_program_choice" class="select select-bordered w-full bg-white">
                             <option value="">-- Select Program --</option>
                             @foreach ($college_programs as $program)
                             <option value="{{$program->id}}"><b>{{$program->code}}</b>-{{$program->description}}</option>
@@ -80,7 +93,7 @@
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Second Choice Program</label>
-                        <select id="second_program_choice" name="second_program_choice" class="select select-bordered w-full bg-white" required>
+                        <select id="second_program_choice" name="second_program_choice" class="select select-bordered w-full bg-white">
                             <option value="">-- Select Program --</option>
                             @foreach ($college_programs as $program)
                             <option value="{{$program->id}}"><b>{{$program->code}}</b>-{{$program->description}}</option>
@@ -89,7 +102,7 @@
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Third Choice Program</label>
-                        <select id="third_program_choice" name="third_program_choice" class="select select-bordered w-full bg-white" required>
+                        <select id="third_program_choice" name="third_program_choice" class="select select-bordered w-full bg-white">
                             <option value="">-- Select Program --</option>
                             @foreach ($college_programs as $program)
                             <option value="{{$program->id}}"><b>{{$program->code}}</b>-{{$program->description}}</option>
@@ -139,7 +152,7 @@
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Birth Place</label>
-                        <input type="text" name="birth_place" class="input input-bordered w-full bg-white" placeholder="Enter birth place" required>
+                        <input type="text" name="place_of_birth" class="input input-bordered w-full bg-white" placeholder="Enter birth place" required>
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Civil Status</label>
@@ -152,7 +165,7 @@
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Zip Code</label>
-                        <input type="text" name="zip_code" class="input input-bordered w-full bg-white" placeholder="Enter zip code" required>
+                        <input type="number" name="zip_code" class="input input-bordered w-full bg-white" placeholder="Enter zip code" value="{{ old('zip_code') }}" required>
                     </div>
                     <div class="form-control col-span-4">
                         <label class="label"><span class="label-text text-gray-700 font-medium">Present Address</label>
@@ -258,11 +271,16 @@
                         <div class="col-span-2"><input type="text" name="senior_inclusive_years" class="input input-bordered w-full bg-white input-sm" placeholder="e.g. 2025-2027" required></div>
                     </div>
                     <!-- College Row -->
-                    <div class="grid grid-cols-12 gap-4 items-center">
+                    <div class="grid grid-cols-12 gap-4 mb-3 items-center">
                         <div class="col-span-2"><span class="text-gray-600 text-sm font-medium">College</span></div>
                         <div class="col-span-4"><input type="text" name="college_school_name" class="input input-bordered w-full bg-white input-sm" placeholder="School name" required></div>
                         <div class="col-span-4"><input type="text" name="college_school_address" class="input input-bordered w-full bg-white input-sm" placeholder="School address" required></div>
                         <div class="col-span-2"><input type="text" name="college_inclusive_years" class="input input-bordered w-full bg-white input-sm" placeholder="e.g. 2027-2031" required></div>
+                    </div>
+                    <!--lrn-->
+                    <div class="grid grid-cols-12 gap-4 items-center">
+                        <div class="col-span-2"><span class="text-gray-600 text-sm font-medium">LRN</span></div>
+                        <div class="col-span-10"><input type="number" name="lrn" class="input input-bordered w-full bg-white input-sm" placeholder="Learner Reference Number" value="{{ old('lrn') }}" required></div>
                     </div>
                 </div>
             </div>
@@ -277,7 +295,26 @@
 </x-layout>
 
 <script>
+    // Generate application number on page load
+    function generateApplicationNo() {
+        const now = new Date();
+        const year = String(now.getFullYear());
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
+        
+        return `${year}${month}${day}${hours}${minutes}${seconds}${milliseconds}`;
+    }
+    
     document.addEventListener('DOMContentLoaded', function () {
+        // Set initial application number
+        const appNoField = document.getElementById('application_no');
+        if(appNoField && !appNoField.value) {
+            appNoField.value = generateApplicationNo();
+        }
         const levelSelect = document.getElementById('level');
         const yearLevelSelect = document.getElementById('year_level');
         const strandSelect = document.getElementById('strand');
