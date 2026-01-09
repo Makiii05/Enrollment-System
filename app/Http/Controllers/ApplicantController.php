@@ -101,4 +101,11 @@ class ApplicantController extends Controller
             ->with('application_no', $applicant->application_no)
             ->with('is_new', $isNew);
     }
+
+    public function showApplicant(){
+        $applicants = Applicant::orderBy('created_at', 'desc')->paginate(20);
+        return view('admission.applicant', [
+            'applicants' => $applicants,
+        ]);
+    }
 }

@@ -45,6 +45,15 @@ return new class extends Migration
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
+            [
+                'name' => 'Admissions',
+                'email' => 'admissions@gmail.com',
+                'type' => 'admissions',
+                'password' => Hash::make('admissions123'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
         ]);
 
 

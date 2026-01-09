@@ -25,5 +25,6 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::define('access-registrar', fn($user) => $user->type === 'registrar');
         Gate::define('access-accounting', fn($user) => $user->type === 'accounting');
+        Gate::define('access-admission', fn($user) => $user->type === 'admission');
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\FeeController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ApplicantController;
+use App\Http\Controllers\AdmissionController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -84,5 +85,19 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
         Route::post('/fee', [FeeController::class, 'createFee'])->name('fee.create');
         Route::post('/fee/{id}/update', [FeeController::class, 'updateFee'])->name('fee.update');
         Route::post('/fee/{id}/delete', [FeeController::class, 'deleteFee'])->name('fee.delete');
+    });
+});
+
+Route::prefix('admission')->name('admission.')->group(function () {
+    Route::get('/', [AdmissionController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdmissionController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdmissionController::class, 'logout'])->name('logout');
+
+    // Protected routes - require authentication and admission type
+    Route::middleware(['auth', 'can:access-admission'])->group(function () {
+        Route::get('/dashboard', [AdmissionController::class, 'showDashboard'])->name('dashboard');
+
+        Route::get('/applicant', [ApplicantController::class, 'showApplicant'])->name('applicant');
+
     });
 });
