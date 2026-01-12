@@ -14,6 +14,7 @@ use App\Http\Controllers\FeeController;
 use App\Http\Controllers\AccountingController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\ScheduleController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -99,5 +100,9 @@ Route::prefix('admission')->name('admission.')->group(function () {
 
         Route::get('/applicant', [ApplicantController::class, 'showApplicant'])->name('applicant');
 
+        Route::get('/schedules', [ScheduleController::class, 'showSchedule'])->name('schedule');
+        Route::post('/schedules', [ScheduleController::class, 'createSchedule'])->name('schedule.create');
+        Route::post('/schedules/{id}/update', [ScheduleController::class, 'updateSchedule'])->name('schedule.update');
+        Route::post('/schedules/{id}/delete', [ScheduleController::class, 'deleteSchedule'])->name('schedule.delete');
     });
 });
