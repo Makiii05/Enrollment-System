@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Level;
 use App\Models\Program;
 use App\Models\Applicant;
+use App\Models\Schedule;
 use Carbon\Carbon;
 
 class ApplicantController extends Controller
@@ -104,8 +105,30 @@ class ApplicantController extends Controller
 
     public function showApplicant(){
         $applicants = Applicant::orderBy('created_at', 'desc')->paginate(20);
+        $schedules = Schedule::orderBy('created_at', 'desc')->where('status', 'active')->where('process', 'interview')->get();
+
         return view('admission.applicant', [
             'applicants' => $applicants,
+            'schedules' => $schedules,
         ]);
+    }
+
+    public function markForInterview(Request $request){
+        $validated = $request->validate([
+            'schedule_id' => 'required|exists:schedules,id',
+            'applicant_ids' => 'required|array|min:1',
+            'applicant_ids.*' => 'exists:applicants,id',
+        ]);
+
+        // Update all selected applicants to 'interview' status
+        Applicant::whereIn('id', $validated['applicant_ids'])
+            ->update([
+                'status' => 'interview',
+            ]);
+
+        $count = count($validated['applicant_ids']);
+        
+        return redirect()->route('admission.applicant')
+            ->with('success', "{$count} applicant(s) marked for interview successfully.");
     }
 }

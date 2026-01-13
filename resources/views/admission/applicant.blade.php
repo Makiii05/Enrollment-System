@@ -1,7 +1,16 @@
 <x-admission_sidebar>
 
-    <div class="m-4 font-bold text-4xl">
-        <h2>Applicant</h2>
+    <div class="flex">
+        <h2 class="m-4 font-bold text-4xl">Applicant</h2>
+        <div class="ms-auto flex gap-2">
+            <select name="schedule" class="select select-bordered" required>
+                <option value="">Select Schedule</option>
+                @foreach ($schedules as $schedule)
+                <option value="{{ $schedule->id }}">{{ date('Y-m-d', strtotime($schedule->date)) }} | {{ date('g:i A', strtotime($schedule->start_time)) }} - {{ date('g:i A', strtotime($schedule->end_time)) }}</option>
+                @endforeach
+            </select>
+            <button class="btn bg-black text-white disabled">Mark For Interview</button>
+        </div>
     </div>
 
     @include('partials.notifications')
@@ -14,10 +23,11 @@
             <thead>
                 <tr>
                     <th></th>
-                    <th>Code</th>
-                    <th>Description</th>
+                    <th>Id</th>
+                    <th>Application No.</th>
+                    <th>Applicant Name</th>
                     <th>Status</th>
-                    <th></th>
+                    <th>Details</th>
                 </tr>
             </thead>
             <tbody>

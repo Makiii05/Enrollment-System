@@ -16,8 +16,14 @@ class Schedule extends Model
     ];
 
     protected $casts = [
-        'date' => 'date',
+        'date' => 'date:Y-m-d',
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
     ];
+
+
+    public function admissions()
+    {
+        return $this->hasMany(Admission::class);
+    }
 }

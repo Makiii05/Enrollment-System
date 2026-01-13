@@ -58,4 +58,9 @@ class Applicant extends Model
         "lrn",
         "status",
     ];
+
+    public function addmission()
+    {
+        return $this->hasOne(Admission::class);
+    } 
 }

@@ -85,7 +85,7 @@
                     <th>Date</th>
                     <th>Start Time</th>
                     <th>End Time</th>
-                    <th>Process</th>
+                    <th>Type</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -98,8 +98,8 @@
                     <td>{{ \Carbon\Carbon::parse($schedule->date)->format('M d, Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}</td>
-                    <td><span class="{{ $schedule->process === 'exam' ? 'text-info' : 'text-warning' }}">{{ ucfirst($schedule->process) }}</span></td>
-                    <td><span class="{{ $schedule->status === 'active' ? 'text-success' : 'text-error' }}">{{ ucfirst($schedule->status) }}</span></td>
+                    <td>{{ $schedule->process }}</td>
+                    <td>{{ $schedule->status }}</td>
                     <td>
                         <button class="text-green-600 hover:underline" onclick="editSchedule({{ $schedule->id }}, '{{ $schedule->proctor }}', '{{ $schedule->date->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}', '{{ $schedule->status }}', '{{ $schedule->process }}')">edit</button>
                         <form action="{{ route('admission.schedule.delete', $schedule->id) }}" method="POST" style="display:inline;">

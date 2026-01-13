@@ -1,5 +1,5 @@
 <x-admission_sidebar>
 
-    this is final eval page
+    this is entrance exam page
 
 </x-admission_sidebar>
