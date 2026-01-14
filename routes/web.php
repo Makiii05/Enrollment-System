@@ -108,6 +108,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::post('/schedules/{id}/delete', [ScheduleController::class, 'deleteSchedule'])->name('schedule.delete');
 
         Route::get('/interview', [AdmissionProcessController::class, 'showInterview'])->name('interview');
+        Route::post('/interview/{id}/update', [AdmissionProcessController::class, 'updateInterview'])->name('interview.update');
         Route::get('/exam', [AdmissionProcessController::class, 'showExam'])->name('exam');
         Route::get('/evaluation', [AdmissionProcessController::class, 'showEvaluation'])->name('evaluation');
     });

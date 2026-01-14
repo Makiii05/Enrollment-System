@@ -7,6 +7,7 @@ use App\Models\Level;
 use App\Models\Program;
 use App\Models\Applicant;
 use App\Models\Schedule;
+use App\Models\Admission;
 use Carbon\Carbon;
 
 class ApplicantController extends Controller
@@ -120,11 +121,29 @@ class ApplicantController extends Controller
             'applicant_ids.*' => 'exists:applicants,id',
         ]);
 
+        // check if status are already marked for interview
+        $alreadyMarked = Applicant::whereIn('id', $validated['applicant_ids'])
+            ->where('status', 'interview')
+            ->count();
+        if($alreadyMarked > 0){
+            return redirect()->route('admission.applicant')
+                ->with('error', 'Some selected applicants are already marked for interview.');
+        }
+
         // Update all selected applicants to 'interview' status
         Applicant::whereIn('id', $validated['applicant_ids'])
             ->update([
                 'status' => 'interview',
             ]);
+
+        // Create admission records for each applicant
+        foreach($validated['applicant_ids'] as $applicantId){
+            Admission::create([
+                'applicant_id' => $applicantId,
+                'interview_schedule_id' => $validated['schedule_id'],
+                'interview_result' => 'pending',
+            ]);
+        }
 
         $count = count($validated['applicant_ids']);
         

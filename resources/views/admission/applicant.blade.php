@@ -1,59 +1,123 @@
 <x-admission_sidebar>
 
-    <div class="flex">
-        <h2 class="m-4 font-bold text-4xl">Applicant</h2>
-        <div class="ms-auto flex gap-2">
-            <select name="schedule" class="select select-bordered" required>
+    @include('partials.notifications')
+    @include('partials.applicant-modal')
+
+    <form id="interviewForm" action="{{ route('admission.applicant.mark-interview') }}" method="POST">
+        @csrf
+        
+        <div class="flex items-center gap-4 mb-4">
+            <h2 class="font-bold text-4xl flex-1">Applicant</h2>
+            <select name="schedule_id" id="scheduleSelect" class="select select-bordered ms-auto" required>
                 <option value="">Select Schedule</option>
                 @foreach ($schedules as $schedule)
                 <option value="{{ $schedule->id }}">{{ date('Y-m-d', strtotime($schedule->date)) }} | {{ date('g:i A', strtotime($schedule->start_time)) }} - {{ date('g:i A', strtotime($schedule->end_time)) }}</option>
                 @endforeach
             </select>
-            <button class="btn bg-black text-white disabled">Mark For Interview</button>
+            <button 
+                type="submit" 
+                id="markInterviewBtn"
+                class="btn bg-gray-400 text-white cursor-not-allowed"
+                disabled
+            >
+                Mark For Interview
+            </button>
         </div>
-    </div>
+        
+        <!--TABLE-->
+        <div class="overflow-x-auto bg-white shadow">
+            <table class="table">
+                <!-- head -->
+                <thead>
+                    <tr>
+                        <th>
+                            <input type="checkbox" id="selectAll" class="checkbox">
+                        </th>
+                        <th>Id</th>
+                        <th>Application No.</th>
+                        <th>Applicant Name</th>
+                        <th>Status</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($applicants as $applicant)
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="applicant_ids[]" value="{{ $applicant->id }}" class="checkbox applicant-checkbox">
+                        </td>
+                        <td>{{$applicant->id}}</td>
+                        <td>{{$applicant->application_no}}</td>
+                        <td>{{$applicant->first_name}} {{$applicant->last_name}}</td>
+                        <td>{{$applicant->status}}</td>
+                        <td>
+                            <button 
+                                type="button" 
+                                class="btn btn-sm btn-ghost text-primary"
+                                onclick="openApplicantModal({{ json_encode($applicant) }})"
+                            >
+                                View Details
+                            </button>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-4">
+            {{ $applicants->links() }}
+        </div>
+    </form>
 
-    @include('partials.notifications')
-    @include('partials.applicant-modal')
-    
-    <!--TABLE-->
-    <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
-            <!-- head -->
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Id</th>
-                    <th>Application No.</th>
-                    <th>Applicant Name</th>
-                    <th>Status</th>
-                    <th>Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($applicants as $applicant)
-                <tr>
-                    <td><input type="checkbox" value="{{ $applicant->id }}"></td>
-                    <td>{{$applicant->id}}</td>
-                    <td>{{$applicant->application_no}}</td>
-                    <td>{{$applicant->first_name}} {{$applicant->last_name}}</td>
-                    <td>{{$applicant->status}}</td>
-                    <td>
-                        <button 
-                            type="button" 
-                            class="btn btn-sm btn-ghost text-primary"
-                            onclick="openApplicantModal({{ json_encode($applicant) }})"
-                        >
-                            View Details
-                        </button>
-                    </td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-    <div class="mt-4">
-        {{ $applicants->links() }}
-    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const scheduleSelect = document.getElementById('scheduleSelect');
+            const markInterviewBtn = document.getElementById('markInterviewBtn');
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const applicantCheckboxes = document.querySelectorAll('.applicant-checkbox');
+
+            function updateButtonState() {
+                const scheduleSelected = scheduleSelect.value !== '';
+                const anyChecked = Array.from(applicantCheckboxes).some(cb => cb.checked);
+                
+                if (scheduleSelected && anyChecked) {
+                    markInterviewBtn.disabled = false;
+                    markInterviewBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    markInterviewBtn.classList.add('bg-black', 'hover:bg-gray-800');
+                } else {
+                    markInterviewBtn.disabled = true;
+                    markInterviewBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    markInterviewBtn.classList.remove('bg-black', 'hover:bg-gray-800');
+                }
+            }
+
+            // Schedule select change
+            scheduleSelect.addEventListener('change', updateButtonState);
+
+            // Individual checkbox change
+            applicantCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Update select all checkbox state
+                    const allChecked = Array.from(applicantCheckboxes).every(cb => cb.checked);
+                    const someChecked = Array.from(applicantCheckboxes).some(cb => cb.checked);
+                    selectAllCheckbox.checked = allChecked;
+                    selectAllCheckbox.indeterminate = someChecked && !allChecked;
+                    
+                    updateButtonState();
+                });
+            });
+
+            // Select all checkbox
+            selectAllCheckbox.addEventListener('change', function() {
+                applicantCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateButtonState();
+            });
+
+            // Initial state
+            updateButtonState();
+        });
+    </script>
 
 </x-admission_sidebar>

@@ -24,15 +24,20 @@ class Admission extends Model
         'decision',
         'evaluated_by',
         'evaluated_at',
-    ]
+    ];
 
     public function applicant()
     {
         return $this->belongsTo(Applicant::class);
     }
 
-    public function schedule()
+    public function interviewSchedule()
     {
-        return $this->belongsTo(Schedule::class);
+        return $this->belongsTo(Schedule::class, 'interview_schedule_id');
+    }
+
+    public function examSchedule()
+    {
+        return $this->belongsTo(Schedule::class, 'exam_schedule_id');
     }
 }
