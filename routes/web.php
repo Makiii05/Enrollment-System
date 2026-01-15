@@ -100,16 +100,21 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::get('/dashboard', [AdmissionController::class, 'showDashboard'])->name('dashboard');
 
         Route::get('/applicant', [ApplicantController::class, 'showApplicant'])->name('applicant');
-        Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
-
+        
         Route::get('/schedules', [ScheduleController::class, 'showSchedule'])->name('schedule');
         Route::post('/schedules', [ScheduleController::class, 'createSchedule'])->name('schedule.create');
         Route::post('/schedules/{id}/update', [ScheduleController::class, 'updateSchedule'])->name('schedule.update');
         Route::post('/schedules/{id}/delete', [ScheduleController::class, 'deleteSchedule'])->name('schedule.delete');
-
+        
         Route::get('/interview', [AdmissionProcessController::class, 'showInterview'])->name('interview');
-        Route::post('/interview/{id}/update', [AdmissionProcessController::class, 'updateInterview'])->name('interview.update');
         Route::get('/exam', [AdmissionProcessController::class, 'showExam'])->name('exam');
         Route::get('/evaluation', [AdmissionProcessController::class, 'showEvaluation'])->name('evaluation');
+        
+        Route::post('/interview/{id}/update', [AdmissionProcessController::class, 'updateInterview'])->name('interview.update');
+        Route::post('/exam/{id}/update', [AdmissionProcessController::class, 'updateExam'])->name('exam.update');
+        
+        Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
+        Route::post('/interview/mark-exam', [AdmissionProcessController::class, 'markForExam'])->name('interview.mark-exam');
+        Route::post('/applicant/mark-eval', [AdmissionProcessController::class, 'markForEvaluation'])->name('applicant.mark-evaluation');
     });
 });

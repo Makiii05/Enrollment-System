@@ -4,7 +4,7 @@
     @include('partials.applicant-modal')
     @include('partials.edit-interview-modal')
 
-    <form id="interviewForm" action="" method="POST">
+    <form id="interviewForm" action="{{ route('admission.interview.mark-exam') }}" method="POST">
         @csrf
         
         <div class="flex items-center gap-4 mb-4">
@@ -17,11 +17,11 @@
             </select>
             <button 
                 type="submit" 
-                id="markInterviewBtn"
+                id="markExamBtn"
                 class="btn bg-gray-400 text-white cursor-not-allowed"
                 disabled
             >
-                Mark For Interview
+                Mark For Examination
             </button>
         </div>
         
@@ -84,7 +84,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const scheduleSelect = document.getElementById('scheduleSelect');
-            const markInterviewBtn = document.getElementById('markInterviewBtn');
+            const markExamBtn = document.getElementById('markExamBtn');
             const selectAllCheckbox = document.getElementById('selectAll');
             const applicantCheckboxes = document.querySelectorAll('.applicant-checkbox');
 
@@ -93,13 +93,13 @@
                 const anyChecked = Array.from(applicantCheckboxes).some(cb => cb.checked);
                 
                 if (scheduleSelected && anyChecked) {
-                    markInterviewBtn.disabled = false;
-                    markInterviewBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                    markInterviewBtn.classList.add('bg-black', 'hover:bg-gray-800');
+                    markExamBtn.disabled = false;
+                    markExamBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    markExamBtn.classList.add('bg-black', 'hover:bg-gray-800');
                 } else {
-                    markInterviewBtn.disabled = true;
-                    markInterviewBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                    markInterviewBtn.classList.remove('bg-black', 'hover:bg-gray-800');
+                    markExamBtn.disabled = true;
+                    markExamBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    markExamBtn.classList.remove('bg-black', 'hover:bg-gray-800');
                 }
             }
 
