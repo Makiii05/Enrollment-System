@@ -186,6 +186,15 @@ class AdmissionProcessController extends Controller
 
     public function showEvaluation()
     {
-        return view('admission.final_eval');
+        $applicants = Admission::with(['applicant'])
+            ->where('final_score', '!=', null)
+            ->whereHas('applicant', function ($query) {
+                $query->where('status', 'evaluation');
+            })
+            ->paginate(20);
+
+        return view('admission.final_eval', [
+            'applicants' => $applicants,
+        ]);    
     }
 }
