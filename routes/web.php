@@ -112,6 +112,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
         
         Route::post('/interview/{id}/update', [AdmissionProcessController::class, 'updateInterview'])->name('interview.update');
         Route::post('/exam/{id}/update', [AdmissionProcessController::class, 'updateExam'])->name('exam.update');
+        Route::post('/evaluation/{id}/update', [AdmissionProcessController::class, 'updateEvaluation'])->name('evaluation.update');
         
         Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
         Route::post('/interview/mark-exam', [AdmissionProcessController::class, 'markForExam'])->name('interview.mark-exam');

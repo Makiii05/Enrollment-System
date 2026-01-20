@@ -2,6 +2,7 @@
 
     @include('partials.notifications')
     @include('partials.applicant-modal')
+    @include('partials.final-evaluation-modal')
 
     <form id="examForm" action="" method="POST">
         @csrf
@@ -60,7 +61,7 @@
                             <button 
                                 type="button" 
                                 class="btn btn-sm btn-ghost text-yellow-600"
-                                onclick="openExamEditModal({{ json_encode($applicant) }})">
+                                onclick="openFinalEvaluationModal({{ json_encode($applicant) }}, {{ json_encode($applicant->applicant) }})">
                                 Edit Decision/Department
                             </button>
                         </td>

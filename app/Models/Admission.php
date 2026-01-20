@@ -22,6 +22,7 @@ class Admission extends Model
         'exam_result',
         'final_score',
         'decision',
+        'program_id',
         'evaluated_by',
         'evaluated_at',
     ];

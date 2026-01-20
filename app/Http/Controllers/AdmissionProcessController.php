@@ -197,4 +197,46 @@ class AdmissionProcessController extends Controller
             'applicants' => $applicants,
         ]);    
     }
+
+    public function updateEvaluation(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'decision' => 'required|in:accepted,rejected',
+                'program' => 'required_if:decision,accepted|nullable|exists:programs,id',
+            ]);
+
+            $admission = Admission::findOrFail($id);
+            
+            $updateData = [
+                'decision' => $validated['decision'],
+                'evaluated_by' => auth()->user()->name ?? auth()->user()->email ?? 'Unknown',
+                'evaluated_at' => now(),
+            ];
+
+            // Only set program_id if accepted
+            if ($validated['decision'] === 'accepted') {
+                $updateData['program_id'] = $validated['program'];
+            }
+
+            $admission->update($updateData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Evaluation submitted successfully.',
+                'data' => $admission,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to submit evaluation: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
