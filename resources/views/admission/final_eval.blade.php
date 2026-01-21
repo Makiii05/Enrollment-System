@@ -4,7 +4,7 @@
     @include('partials.applicant-modal')
     @include('partials.final-evaluation-modal')
 
-    <form id="examForm" action="" method="POST">
+    <form id="admitForm" action="{{ route('admission.evaluation.admit') }}" method="POST">
         @csrf
         
         <div class="flex items-center gap-4 mb-4">

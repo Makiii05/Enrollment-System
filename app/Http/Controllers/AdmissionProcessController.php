@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Schedule;
 use App\Models\Admission;
 use App\Models\Applicant;
+use App\Http\Controllers\StudentController;
 
 class AdmissionProcessController extends Controller
 {
@@ -238,5 +239,57 @@ class AdmissionProcessController extends Controller
                 'message' => 'Failed to submit evaluation: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    public function admitStudents(Request $request)
+    {
+        $validated = $request->validate([
+            'applicant_ids' => 'required|array|min:1',
+            'applicant_ids.*' => 'exists:admissions,id',
+        ]);
+
+        $admittedCount = 0;
+        $deniedCount = 0;
+        $errors = [];
+
+        foreach ($validated['applicant_ids'] as $admissionId) {
+            $admission = Admission::with('applicant')->find($admissionId);
+            
+            if (!$admission) {
+                $errors[] = "Admission ID {$admissionId} not found.";
+                continue;
+            }
+
+            // Check if decision is accepted
+            if ($admission->decision !== 'accepted') {
+                $deniedCount++;
+                continue;
+            }
+
+            // Update applicant status to admitted
+            $applicant = $admission->applicant;
+            $applicant->update(['status' => 'admitted']);
+
+            // Create student record
+            $studentController = new StudentController();
+            $result = $studentController->createStudentFromApplicant($applicant, $admission);
+
+            if ($result['success']) {
+                $admittedCount++;
+            } else {
+                $errors[] = $result['message'];
+            }
+        }
+
+        $message = "{$admittedCount} applicant(s) admitted successfully.";
+        if ($deniedCount > 0) {
+            $message .= " {$deniedCount} applicant(s) were skipped (not accepted).";
+        }
+        if (count($errors) > 0) {
+            $message .= " Errors: " . implode(', ', $errors);
+        }
+
+        return redirect()->route('admission.evaluation')
+            ->with($admittedCount > 0 ? 'success' : 'error', $message);
     }
 }

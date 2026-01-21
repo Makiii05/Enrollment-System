@@ -16,6 +16,7 @@ use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AdmissionProcessController;
+use App\Http\Controllers\StudentController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -117,5 +118,10 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
         Route::post('/interview/mark-exam', [AdmissionProcessController::class, 'markForExam'])->name('interview.mark-exam');
         Route::post('/applicant/mark-eval', [AdmissionProcessController::class, 'markForEvaluation'])->name('applicant.mark-evaluation');
+        Route::post('/evaluation/admit', [AdmissionProcessController::class, 'admitStudents'])->name('evaluation.admit');
+        
+        Route::get('/student', [StudentController::class, 'showStudent'])->name('student');
+        Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
+        Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
     });
 });
