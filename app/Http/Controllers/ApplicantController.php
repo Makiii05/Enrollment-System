@@ -121,23 +121,25 @@ class ApplicantController extends Controller
             'applicant_ids.*' => 'exists:applicants,id',
         ]);
 
-        // check if status are already marked for interview
-        $alreadyMarked = Applicant::whereIn('id', $validated['applicant_ids'])
-            ->where('status', 'interview')
-            ->count();
-        if($alreadyMarked > 0){
+        // Get only applicants with 'pending' status
+        $pendingApplicants = Applicant::whereIn('id', $validated['applicant_ids'])
+            ->where('status', 'pending')
+            ->pluck('id')
+            ->toArray();
+
+        if(count($pendingApplicants) === 0){
             return redirect()->route('admission.applicant')
-                ->with('error', 'Some selected applicants are already marked for interview.');
+                ->with('error', 'No pending applicants selected. Only applicants with pending status can be marked for interview.');
         }
 
-        // Update all selected applicants to 'interview' status
-        Applicant::whereIn('id', $validated['applicant_ids'])
+        // Update only pending applicants to 'interview' status
+        Applicant::whereIn('id', $pendingApplicants)
             ->update([
                 'status' => 'interview',
             ]);
 
-        // Create admission records for each applicant
-        foreach($validated['applicant_ids'] as $applicantId){
+        // Create admission records only for pending applicants
+        foreach($pendingApplicants as $applicantId){
             Admission::create([
                 'applicant_id' => $applicantId,
                 'interview_schedule_id' => $validated['schedule_id'],
@@ -145,9 +147,15 @@ class ApplicantController extends Controller
             ]);
         }
 
-        $count = count($validated['applicant_ids']);
+        $count = count($pendingApplicants);
+        $skipped = count($validated['applicant_ids']) - $count;
         
+        $message = "{$count} applicant(s) marked for interview successfully.";
+        if($skipped > 0){
+            $message .= " {$skipped} applicant(s) were skipped (not in pending status).";
+        }
+
         return redirect()->route('admission.applicant')
-            ->with('success', "{$count} applicant(s) marked for interview successfully.");
+            ->with('success', $message);
     }
 }

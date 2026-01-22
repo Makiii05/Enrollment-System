@@ -1,5 +1,6 @@
 <x-layout>
     @include('partials.success-notification')
+    @include('partials.consent-modal')
     <div class="w-full p-6 max-w-7xl mx-auto">
         <div class="mb-6">
             <h3 class="text-2xl font-bold text-gray-800">Submit Application</h3>
@@ -285,10 +286,31 @@
                 </div>
             </div>
 
+            <!-- Consent Section -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="border-b border-gray-200 px-6 py-3">
+                    <h4 class="text-gray-800 font-semibold">Data Privacy Consent</h4>
+                </div>
+                <div class="p-6">
+                    <div class="form-control">
+                        <label class="cursor-pointer flex items-start gap-3">
+                            <input type="checkbox" id="consent_checkbox" name="consent_to_data_access" class="checkbox checkbox-primary mt-1" value="1">
+                            <span class="label-text text-gray-700 text-sm leading-relaxed">
+                                I have read and agree to the 
+                                <a href="#" onclick="document.getElementById('consent_modal').showModal(); return false;" class="text-blue-600 hover:text-blue-800 underline font-medium">
+                                    Data Privacy Consent
+                                </a> 
+                                and I consent to the collection, processing, and storage of my personal data.
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <!-- Submit Button -->
             <div class="flex justify-end gap-3 pt-4">
                 <button type="reset" class="btn btn-ghost border border-gray-300">Reset Form</button>
-                <button type="submit" class="btn btn-primary">Submit Application</button>
+                <button type="submit" id="submit_btn" class="btn btn-primary" disabled>Submit Application</button>
             </div>
         </form>
     </div>
@@ -315,6 +337,15 @@
         if(appNoField && !appNoField.value) {
             appNoField.value = generateApplicationNo();
         }
+
+        // Consent checkbox - enable/disable submit button
+        const consentCheckbox = document.getElementById('consent_checkbox');
+        const submitBtn = document.getElementById('submit_btn');
+        
+        consentCheckbox.addEventListener('change', function() {
+            submitBtn.disabled = !this.checked;
+        });
+
         const levelSelect = document.getElementById('level');
         const yearLevelSelect = document.getElementById('year_level');
         const strandSelect = document.getElementById('strand');
