@@ -116,6 +116,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::post('/evaluation/{id}/update', [AdmissionProcessController::class, 'updateEvaluation'])->name('evaluation.update');
         
         Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
+        Route::post('/applicant/delete', [ApplicantController::class, 'deleteApplicants'])->name('applicant.delete');
         Route::post('/interview/mark-exam', [AdmissionProcessController::class, 'markForExam'])->name('interview.mark-exam');
         Route::post('/applicant/mark-eval', [AdmissionProcessController::class, 'markForEvaluation'])->name('applicant.mark-evaluation');
         Route::post('/evaluation/admit', [AdmissionProcessController::class, 'admitStudents'])->name('evaluation.admit');

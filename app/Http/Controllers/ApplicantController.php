@@ -158,4 +158,39 @@ class ApplicantController extends Controller
         return redirect()->route('admission.applicant')
             ->with('success', $message);
     }
+
+    public function deleteApplicants(Request $request){
+        $validated = $request->validate([
+            'applicant_ids' => 'required|array|min:1',
+            'applicant_ids.*' => 'exists:applicants,id',
+        ]);
+
+        // Get only applicants who are NOT admitted (status is not 'admitted')
+        $deletableApplicants = Applicant::whereIn('id', $validated['applicant_ids'])
+            ->where('status', '!=', 'admitted')
+            ->pluck('id')
+            ->toArray();
+
+        if(count($deletableApplicants) === 0){
+            return redirect()->route('admission.applicant')
+                ->with('error', 'No applicants deleted. Only applicants who are not yet admitted can be deleted.');
+        }
+
+        // Delete related admission records first
+        Admission::whereIn('applicant_id', $deletableApplicants)->delete();
+
+        // Delete the applicants
+        Applicant::whereIn('id', $deletableApplicants)->delete();
+
+        $count = count($deletableApplicants);
+        $skipped = count($validated['applicant_ids']) - $count;
+        
+        $message = "{$count} applicant(s) deleted successfully.";
+        if($skipped > 0){
+            $message .= " {$skipped} applicant(s) were skipped (already admitted).";
+        }
+
+        return redirect()->route('admission.applicant')
+            ->with('success', $message);
+    }
 }
