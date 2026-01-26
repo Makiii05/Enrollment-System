@@ -12,7 +12,25 @@ use App\Models\Department;
 
 class ProspectusController extends Controller
 {
-    //
+    private function validateSearchRequest(Request $request): array
+    {
+        return $request->validate([
+            'department' => 'required|string|max:255',
+            'academic_year' => 'required|string|max:255',
+        ]);
+    }
+
+    private function validateProspectusRequest(Request $request): array
+    {
+        return $request->validate([
+            'curriculum' => 'required|exists:curricula,id',
+            'academic_term' => 'required|exists:academic_terms,id',
+            'level' => 'required|exists:levels,id',
+            'subject' => 'required|exists:subjects,id',
+            'status' => 'required|in:active,inactive',
+        ]);
+    }
+
     public function showProspectus(){
         $curricula = Curriculum::where('status', 'active')->orderBy("created_at", "asc")->get();
         $academicTerms = AcademicTerm::where('status', 'active')->orderBy("created_at", "asc")->get();
@@ -32,13 +50,10 @@ class ProspectusController extends Controller
     }
 
     public function searchProspectus(Request $request){
-        $request->validate([
-            'department' => 'required|string|max:255',
-            'academic_year' => 'required|string|max:255',
-        ]);
+        $validated = $this->validateSearchRequest($request);
 
-        $department = $request->department;
-        $academic_year = $request->academic_year;
+        $department = $validated['department'];
+        $academic_year = $validated['academic_year'];
 
         $prospectuses = Prospectus::where('status', 'active')
             ->whereHas('curriculum', function ($query) use ($department) {
@@ -71,13 +86,7 @@ class ProspectusController extends Controller
     }
     
     public function createProspectus(Request $request){
-        $validated = $request->validate([
-            'curriculum' => 'required|exists:curricula,id',
-            'academic_term' => 'required|exists:academic_terms,id',
-            'level' => 'required|exists:levels,id',
-            'subject' => 'required|exists:subjects,id',
-            'status' => 'required|in:active,inactive',
-        ]);
+        $validated = $this->validateProspectusRequest($request);
 
         $prospectus = Prospectus::create([
             'curriculum_id' => $validated['curriculum'],
@@ -99,13 +108,7 @@ class ProspectusController extends Controller
     public function updateProspectus(Request $request, $id){
         $prospectus = Prospectus::findOrFail($id);
         
-        $validated = $request->validate([
-            'curriculum' => 'required|exists:curricula,id',
-            'academic_term' => 'required|exists:academic_terms,id',
-            'level' => 'required|exists:levels,id',
-            'subject' => 'required|exists:subjects,id',
-            'status' => 'required|in:active,inactive',
-        ]);
+        $validated = $this->validateProspectusRequest($request);
 
         $prospectus->update([
             'curriculum_id' => $validated['curriculum'],
@@ -147,13 +150,10 @@ class ProspectusController extends Controller
 
     public function getProspectusesApi(Request $request)
     {
-        $request->validate([
-            'department' => 'required|string|max:255',
-            'academic_year' => 'required|string|max:255',
-        ]);
+        $validated = $this->validateSearchRequest($request);
 
-        $department = $request->department;
-        $academic_year = $request->academic_year;
+        $department = $validated['department'];
+        $academic_year = $validated['academic_year'];
 
         $prospectuses = Prospectus::where('status', 'active')
             ->whereHas('curriculum', function ($query) use ($department) {
@@ -166,7 +166,6 @@ class ProspectusController extends Controller
             ->orderBy("created_at", "asc")
             ->get();
 
-        // Group by academic_term_id, then by level_id
         $grouped = $prospectuses->groupBy('academic_term_id')->map(function ($termGroup) {
             return [
                 'academic_term' => $termGroup->first()->academicTerm,
