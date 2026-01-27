@@ -5,6 +5,7 @@
     </div>
 
     @include('partials.notifications')
+    @include('partials.schedule-applicants-modal')
     <div class="m-4 grid">
         <button class="btn w-auto justify-self-end bg-white shadow" onclick="form_modal.showModal()">Add Schedule</button>
     </div>
@@ -100,7 +101,33 @@
                     <td>{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}</td>
                     <td>{{ $schedule->process }}</td>
                     <td>{{ $schedule->status }}</td>
-                    <td>
+                    <td class="flex gap-2 items-center">
+                        @php
+                            // Get applicants for this schedule based on process type
+                            $applicants = $schedule->process === 'exam' 
+                                ? \App\Models\Admission::where('exam_schedule_id', $schedule->id)->with('applicant')->get()->pluck('applicant')->filter()
+                                : \App\Models\Admission::where('interview_schedule_id', $schedule->id)->with('applicant')->get()->pluck('applicant')->filter();
+                        @endphp
+                        <button 
+                            class="text-blue-600 hover:underline"
+                            onclick="showScheduleApplicants(
+                                {{ $schedule->id }}, 
+                                '{{ $schedule->proctor }}', 
+                                '{{ \Carbon\Carbon::parse($schedule->date)->format('M d, Y') }}', 
+                                '{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}', 
+                                '{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}', 
+                                '{{ $schedule->process }}',
+                                '{{ $applicants->map(fn($a) => [
+                                    'application_no' => $a->application_no,
+                                    'last_name' => $a->last_name,
+                                    'first_name' => $a->first_name,
+                                    'middle_name' => $a->middle_name,
+                                    'email' => $a->email,
+                                    'mobile_number' => $a->mobile_number,
+                                    'status' => $a->status
+                                ])->values()->toJson() }}'
+                            )"
+                        >view</button>
                         <button class="text-green-600 hover:underline" onclick="editSchedule({{ $schedule->id }}, '{{ $schedule->proctor }}', '{{ $schedule->date->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}', '{{ $schedule->status }}', '{{ $schedule->process }}')">edit</button>
                         <form action="{{ route('admission.schedule.delete', $schedule->id) }}" method="POST" style="display:inline;">
                             @csrf
