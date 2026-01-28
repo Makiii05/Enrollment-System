@@ -32,7 +32,8 @@ return new class extends Migration
             //eval
             $table->string('final_score');
             $table->enum('decision', ['accepted', 'rejected', 'pending'])->default('pending');
-            $table->foreignId('program_id')->nullable()->constrained('programs')->onDelete('set null');
+            $table->foreignId('program_id')->nullable()->constrained('programs')->onDeletse('set null');
+            $table->foreignId('evaluation_schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->string('evaluated_by');
             $table->string('evaluated_at');
         });

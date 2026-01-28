@@ -23,6 +23,7 @@ class Admission extends Model
         'final_score',
         'decision',
         'program_id',
+        'evaluation_schedule_id',
         'evaluated_by',
         'evaluated_at',
     ];
@@ -40,5 +41,10 @@ class Admission extends Model
     public function examSchedule()
     {
         return $this->belongsTo(Schedule::class, 'exam_schedule_id');
+    }
+    
+    public function evaluationSchedule()
+    {
+        return $this->belongsTo(Schedule::class, 'evaluation_schedule_id');
     }
 }

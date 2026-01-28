@@ -25,19 +25,22 @@
         @csrf
         
         <div class="flex justify-end items-center gap-4 mb-4">
-            <select name="schedule_id" id="scheduleSelect" class="select select-bordered" required>
-                <option value="">Select Schedule</option>
-                @foreach ($schedules as $schedule)
-                <option value="{{ $schedule->id }}">{{ date('Y-m-d', strtotime($schedule->date)) }} | {{ date('g:i A', strtotime($schedule->start_time)) }} - {{ date('g:i A', strtotime($schedule->end_time)) }}</option>
-                @endforeach
+            <select name="action" id="actionSelect" class="select select-bordered" required>
+                <option value="">Select Action</option>
+                <option value="markForInterview">Mark For Interview</option>
+                <option value="markForExamination">Mark For Examination</option>
+                <option value="markForEvaluation">Mark For Evaluation</option>
             </select>
-            <button 
-                type="submit" 
-                id="markInterviewBtn"
-                class="btn bg-gray-400 text-white cursor-not-allowed"
-                disabled
-            >
-                Mark For Interview
+            <div class="relative">
+                <select name="schedule_id" id="scheduleSelect" class="select select-bordered min-w-[250px]" required>
+                    <option value="">Select Schedule</option>
+                </select>
+                <div id="scheduleLoading" class="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 rounded-lg opacity-0 pointer-events-none transition-opacity duration-200">
+                    <span class="loading loading-spinner loading-sm"></span>
+                </div>
+            </div>
+            <button type="submit" id="proceedBtn" class="btn bg-gray-400 text-white cursor-not-allowed" disabled>
+                Proceed
             </button>
         </div>
         
@@ -105,28 +108,33 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const actionSelect = document.getElementById('actionSelect');
             const scheduleSelect = document.getElementById('scheduleSelect');
-            const markInterviewBtn = document.getElementById('markInterviewBtn');
+            const scheduleLoading = document.getElementById('scheduleLoading');
+            const proceedBtn = document.getElementById('proceedBtn');
             const deleteBtn = document.getElementById('deleteBtn');
             const selectAllCheckbox = document.getElementById('selectAll');
             const applicantCheckboxes = document.querySelectorAll('.applicant-checkbox');
 
             function updateButtonState() {
+                const actionSelected = actionSelect.value !== '';
                 const scheduleSelected = scheduleSelect.value !== '';
                 const anyChecked = Array.from(applicantCheckboxes).some(cb => cb.checked);
+                const isEvaluation = actionSelect.value === 'markForEvaluation';
                 
                 // Check if any non-admitted applicants are selected for delete button
                 const anyDeletableChecked = Array.from(applicantCheckboxes).some(cb => cb.checked && cb.dataset.status !== 'admitted');
                 
-                // Mark Interview Button
-                if (scheduleSelected && anyChecked) {
-                    markInterviewBtn.disabled = false;
-                    markInterviewBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                    markInterviewBtn.classList.add('bg-black', 'hover:bg-gray-800');
+                // Proceed Button - requires action, schedule (unless evaluation), and selected applicants
+                const canProceed = actionSelected && anyChecked && (isEvaluation || scheduleSelected);
+                if (canProceed) {
+                    proceedBtn.disabled = false;
+                    proceedBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                    proceedBtn.classList.add('bg-black', 'hover:bg-gray-800');
                 } else {
-                    markInterviewBtn.disabled = true;
-                    markInterviewBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                    markInterviewBtn.classList.remove('bg-black', 'hover:bg-gray-800');
+                    proceedBtn.disabled = true;
+                    proceedBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    proceedBtn.classList.remove('bg-black', 'hover:bg-gray-800');
                 }
 
                 // Delete Button - only enable if non-admitted applicants are selected
@@ -140,6 +148,69 @@
                     deleteBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
                 }
             }
+
+            // Async function to load schedules based on action
+            async function loadSchedules(processType) {
+                scheduleSelect.innerHTML = '<option value="">Select Schedule</option>';
+                
+                if (!processType) {
+                    scheduleSelect.disabled = false;
+                    updateButtonState();
+                    return;
+                }
+
+                // For evaluation, no schedule needed
+                if (processType === 'evaluation') {
+                    scheduleSelect.disabled = true;
+                    scheduleSelect.innerHTML = '<option value="">No schedule required</option>';
+                    updateButtonState();
+                    return;
+                }
+
+                scheduleLoading.classList.remove('opacity-0', 'pointer-events-none');
+                scheduleSelect.disabled = true;
+
+                try {
+                    const response = await fetch(`{{ route('admission.api.schedules') }}?process=${processType}`);
+                    const data = await response.json();
+
+                    scheduleSelect.innerHTML = '<option value="">Select Schedule</option>';
+                    
+                    if (data.success && data.data.length > 0) {
+                        data.data.forEach(schedule => {
+                            const option = document.createElement('option');
+                            option.value = schedule.id;
+                            option.textContent = schedule.label;
+                            scheduleSelect.appendChild(option);
+                        });
+                    } else {
+                        scheduleSelect.innerHTML = '<option value="">No schedules available</option>';
+                    }
+                } catch (error) {
+                    console.error('Error loading schedules:', error);
+                    scheduleSelect.innerHTML = '<option value="">Error loading schedules</option>';
+                } finally {
+                    scheduleLoading.classList.add('opacity-0', 'pointer-events-none');
+                    scheduleSelect.disabled = false;
+                    updateButtonState();
+                }
+            }
+
+            // Action select change - load corresponding schedules
+            actionSelect.addEventListener('change', function() {
+                const action = this.value;
+                let processType = '';
+                
+                if (action === 'markForInterview') {
+                    processType = 'interview';
+                } else if (action === 'markForExamination') {
+                    processType = 'exam';
+                } else if (action === 'markForEvaluation') {
+                    processType = 'evaluation';
+                }
+                
+                loadSchedules(processType);
+            });
 
             // Schedule select change
             scheduleSelect.addEventListener('change', updateButtonState);

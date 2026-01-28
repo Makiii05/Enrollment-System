@@ -105,52 +105,84 @@ class ApplicantController extends Controller
     }
 
     public function showApplicant(){
-        $applicants = Applicant::orderBy('created_at', 'desc')->paginate(20);
-        $schedules = Schedule::orderBy('created_at', 'desc')->where('status', 'active')->where('process', 'interview')->get();
+            $applicants = Applicant::orderBy('created_at', 'desc')->paginate(20);
 
         return view('admission.applicant', [
             'applicants' => $applicants,
-            'schedules' => $schedules,
         ]);
     }
 
     public function markForInterview(Request $request){
         $validated = $request->validate([
-            'schedule_id' => 'required|exists:schedules,id',
+            'action' => 'required|in:markForInterview,markForExamination,markForEvaluation',
+            'schedule_id' => 'required_unless:action,markForEvaluation|nullable|exists:schedules,id',
             'applicant_ids' => 'required|array|min:1',
             'applicant_ids.*' => 'exists:applicants,id',
         ]);
 
+        $action = $validated['action'];
+        $applicantIds = $validated['applicant_ids'];
+        $scheduleId = $validated['schedule_id'] ?? null;
+
         // Get only applicants with 'pending' status
-        $pendingApplicants = Applicant::whereIn('id', $validated['applicant_ids'])
+        $pendingApplicants = Applicant::whereIn('id', $applicantIds)
             ->where('status', 'pending')
             ->pluck('id')
             ->toArray();
 
         if(count($pendingApplicants) === 0){
             return redirect()->route('admission.applicant')
-                ->with('error', 'No pending applicants selected. Only applicants with pending status can be marked for interview.');
-        }
-
-        // Update only pending applicants to 'interview' status
-        Applicant::whereIn('id', $pendingApplicants)
-            ->update([
-                'status' => 'interview',
-            ]);
-
-        // Create admission records only for pending applicants
-        foreach($pendingApplicants as $applicantId){
-            Admission::create([
-                'applicant_id' => $applicantId,
-                'interview_schedule_id' => $validated['schedule_id'],
-                'interview_result' => 'pending',
-            ]);
+                ->with('error', 'No pending applicants selected. Only applicants with pending status can be processed.');
         }
 
         $count = count($pendingApplicants);
-        $skipped = count($validated['applicant_ids']) - $count;
+        $skipped = count($applicantIds) - $count;
         
-        $message = "{$count} applicant(s) marked for interview successfully.";
+        if ($action === 'markForInterview') {
+            // Update only pending applicants to 'interview' status
+            Applicant::whereIn('id', $pendingApplicants)
+                ->update(['status' => 'interview']);
+
+            // Create admission records only for pending applicants
+            foreach($pendingApplicants as $applicantId){
+                Admission::create([
+                    'applicant_id' => $applicantId,
+                    'interview_schedule_id' => $scheduleId,
+                    'interview_result' => 'pending',
+                ]);
+            }
+            $message = "{$count} applicant(s) marked for interview successfully.";
+            
+        } elseif ($action === 'markForExamination') {
+            // Update only pending applicants to 'exam' status
+            Applicant::whereIn('id', $pendingApplicants)
+                ->update(['status' => 'exam']);
+
+            // Create admission records only for pending applicants
+            foreach($pendingApplicants as $applicantId){
+                Admission::create([
+                    'applicant_id' => $applicantId,
+                    'exam_schedule_id' => $scheduleId,
+                    'exam_result' => 'pending',
+                ]);
+            }
+            $message = "{$count} applicant(s) marked for examination successfully.";
+            
+        } elseif ($action === 'markForEvaluation') {
+            // Update only pending applicants to 'evaluation' status
+            Applicant::whereIn('id', $pendingApplicants)
+                ->update(['status' => 'evaluation']);
+
+            // Create admission records only for pending applicants
+            foreach($pendingApplicants as $applicantId){
+                Admission::create([
+                    'applicant_id' => $applicantId,
+                    'final_score' => 0, // No exam/interview scores
+                ]);
+            }
+            $message = "{$count} applicant(s) marked for evaluation successfully.";
+        }
+
         if($skipped > 0){
             $message .= " {$skipped} applicant(s) were skipped (not in pending status).";
         }

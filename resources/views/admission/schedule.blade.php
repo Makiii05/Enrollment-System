@@ -55,6 +55,7 @@
                     <select name="process" class="select select-bordered w-full">
                         <option value="exam">Exam</option>
                         <option value="interview">Interview</option>
+                        <option value="evaluation">Evaluation</option>
                     </select>
                 </div>
 
@@ -87,6 +88,7 @@
                     <th>Start Time</th>
                     <th>End Time</th>
                     <th>Type</th>
+                    <th>Applicants</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -100,14 +102,9 @@
                     <td>{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}</td>
                     <td>{{ $schedule->process }}</td>
+                    <td>{{ $schedule->applicants->count() }}</td>
                     <td>{{ $schedule->status }}</td>
                     <td class="flex gap-2 items-center">
-                        @php
-                            // Get applicants for this schedule based on process type
-                            $applicants = $schedule->process === 'exam' 
-                                ? \App\Models\Admission::where('exam_schedule_id', $schedule->id)->with('applicant')->get()->pluck('applicant')->filter()
-                                : \App\Models\Admission::where('interview_schedule_id', $schedule->id)->with('applicant')->get()->pluck('applicant')->filter();
-                        @endphp
                         <button 
                             class="text-blue-600 hover:underline"
                             onclick="showScheduleApplicants(
@@ -117,7 +114,7 @@
                                 '{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}', 
                                 '{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}', 
                                 '{{ $schedule->process }}',
-                                '{{ $applicants->map(fn($a) => [
+                                '{{ $schedule->applicants->map(fn($a) => [
                                     'application_no' => $a->application_no,
                                     'last_name' => $a->last_name,
                                     'first_name' => $a->first_name,

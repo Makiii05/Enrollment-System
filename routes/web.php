@@ -106,6 +106,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::post('/schedules', [ScheduleController::class, 'createSchedule'])->name('schedule.create');
         Route::post('/schedules/{id}/update', [ScheduleController::class, 'updateSchedule'])->name('schedule.update');
         Route::post('/schedules/{id}/delete', [ScheduleController::class, 'deleteSchedule'])->name('schedule.delete');
+        Route::get('/api/schedules', [ScheduleController::class, 'getSchedulesByProcess'])->name('api.schedules');
         
         Route::get('/interview', [AdmissionProcessController::class, 'showInterview'])->name('interview');
         Route::get('/exam', [AdmissionProcessController::class, 'showExam'])->name('exam');
@@ -117,8 +118,9 @@ Route::prefix('admission')->name('admission.')->group(function () {
         
         Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
         Route::post('/applicant/delete', [ApplicantController::class, 'deleteApplicants'])->name('applicant.delete');
-        Route::post('/interview/mark-exam', [AdmissionProcessController::class, 'markForExam'])->name('interview.mark-exam');
-        Route::post('/applicant/mark-eval', [AdmissionProcessController::class, 'markForEvaluation'])->name('applicant.mark-evaluation');
+        Route::post('/interview/process-action', [AdmissionProcessController::class, 'processInterviewAction'])->name('interview.process-action');
+        Route::post('/exam/process-action', [AdmissionProcessController::class, 'processExamAction'])->name('exam.process-action');
+        Route::post('/evaluation/process-action', [AdmissionProcessController::class, 'processEvaluationAction'])->name('evaluation.process-action');
         Route::post('/evaluation/admit', [AdmissionProcessController::class, 'admitStudents'])->name('evaluation.admit');
         
         Route::get('/student', [StudentController::class, 'showStudent'])->name('student');

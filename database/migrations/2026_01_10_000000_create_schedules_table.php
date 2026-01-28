@@ -19,7 +19,7 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time');
             $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->enum('process', ['exam', 'interview'])->default('exam');
+            $table->enum('process', ['exam', 'interview', 'evaluation'])->default('exam');
         });
     }
 

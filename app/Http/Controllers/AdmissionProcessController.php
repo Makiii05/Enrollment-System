@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Schedule;
 use App\Models\Admission;
 use App\Models\Applicant;
 use App\Http\Controllers\StudentController;
@@ -12,17 +11,244 @@ class AdmissionProcessController extends Controller
 {
     public function showInterview()
     {
-        $schedules = Schedule::orderBy('created_at', 'desc')->where('status', 'active')->where('process', 'exam')->get();
         $applicants = Admission::with(['applicant', 'interviewSchedule'])
             ->whereHas('applicant', function ($query) {
                 $query->where('status', 'interview');
             })
             ->paginate(20);
-
+            
         return view('admission.interview', [
-            'schedules' => $schedules,
             'applicants' => $applicants,
         ]);
+    }
+
+    public function showExam()
+    {
+        $applicants = Admission::with(['applicant', 'examSchedule'])
+            ->whereHas('applicant', function ($query) {
+                $query->where('status', 'exam');
+            })
+            ->paginate(20);
+
+        return view('admission.entrance_exam', [
+            'applicants' => $applicants,
+        ]);    
+    }
+    
+    public function showEvaluation()
+    {
+        $applicants = Admission::with(['applicant', 'evaluationSchedule'])
+            ->where('final_score', '!=', null)
+            ->whereHas('applicant', function ($query) {
+                $query->where('status', 'evaluation');
+            })
+            ->paginate(20);
+
+        return view('admission.final_eval', [
+            'applicants' => $applicants,
+        ]);    
+    }
+
+    /**
+     * Handle actions from interview page (reschedule interview, mark for exam, mark for evaluation)
+     */
+    public function processInterviewAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:reschedule,markForExamination,markForEvaluation',
+            'schedule_id' => 'required_if:action,reschedule,markForExamination|nullable|exists:schedules,id',
+            'applicant_ids' => 'required|array|min:1',
+            'applicant_ids.*' => 'exists:admissions,id',
+        ]);
+
+        $action = $validated['action'];
+        $admissionIds = $validated['applicant_ids'];
+        $scheduleId = $validated['schedule_id'] ?? null;
+        $count = count($admissionIds);
+
+        if ($action === 'reschedule') {
+            // Reschedule interview - just update the interview schedule
+            Admission::whereIn('id', $admissionIds)->update([
+                'interview_schedule_id' => $scheduleId,
+            ]);
+            return redirect()->route('admission.interview')
+                ->with('success', "{$count} applicant(s) rescheduled successfully.");
+                
+        } elseif ($action === 'markForExamination') {
+            // Check if all applicants passed the interview
+            $notPassed = Admission::whereIn('id', $admissionIds)
+                ->where('interview_result', '!=', 'passed')
+                ->count();
+            if ($notPassed > 0) {
+                return redirect()->route('admission.interview')
+                    ->with('error', 'Some selected applicants have not passed the interview.');
+            }
+
+            // Update applicants to exam status
+            Applicant::whereIn('id', function($query) use ($admissionIds) {
+                $query->select('applicant_id')
+                      ->from('admissions')
+                      ->whereIn('id', $admissionIds);
+            })->update(['status' => 'exam']);
+
+            // Update admission records
+            Admission::whereIn('id', $admissionIds)->update([
+                'exam_schedule_id' => $scheduleId,
+                'exam_result' => 'pending',
+            ]);
+            
+            return redirect()->route('admission.interview')
+                ->with('success', "{$count} applicant(s) marked for examination successfully.");
+                
+        } elseif ($action === 'markForEvaluation') {
+            // Check if all applicants passed the interview
+            $notPassed = Admission::whereIn('id', $admissionIds)
+                ->where('interview_result', '!=', 'passed')
+                ->count();
+            if ($notPassed > 0) {
+                return redirect()->route('admission.interview')
+                    ->with('error', 'Some selected applicants have not passed the interview.');
+            }
+
+            // Update applicants to evaluation status
+            Applicant::whereIn('id', function($query) use ($admissionIds) {
+                $query->select('applicant_id')
+                      ->from('admissions')
+                      ->whereIn('id', $admissionIds);
+            })->update(['status' => 'evaluation']);
+
+            // Update admission records with final score from interview
+            foreach ($admissionIds as $admissionId) {
+                $admission = Admission::find($admissionId);
+                $admission->update([
+                    'final_score' => $admission->interview_score ?? 0,
+                ]);
+            }
+            
+            return redirect()->route('admission.interview')
+                ->with('success', "{$count} applicant(s) marked for evaluation successfully.");
+        }
+
+        return redirect()->route('admission.interview')
+            ->with('error', 'Invalid action.');
+    }
+
+    /**
+     * Handle actions from exam page (reschedule exam, mark for evaluation)
+     */
+    public function processExamAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:reschedule,markForInterview,markForEvaluation',
+            'schedule_id' => 'required_if:action,reschedule,markForInterview|nullable|exists:schedules,id',
+            'applicant_ids' => 'required|array|min:1',
+            'applicant_ids.*' => 'exists:admissions,id',
+        ]);
+
+        $action = $validated['action'];
+        $admissionIds = $validated['applicant_ids'];
+        $scheduleId = $validated['schedule_id'] ?? null;
+        $count = count($admissionIds);
+
+        if ($action === 'reschedule') {
+            // Reschedule exam - just update the exam schedule
+            Admission::whereIn('id', $admissionIds)->update([
+                'exam_schedule_id' => $scheduleId,
+            ]);
+            return redirect()->route('admission.exam')
+                ->with('success', "{$count} applicant(s) rescheduled successfully.");
+                
+        } elseif ($action === 'markForInterview') {
+            // Check if all applicants passed the exam
+            $notPassed = Admission::whereIn('id', $admissionIds)
+                ->where('exam_result', '!=', 'passed')
+                ->count();
+            if ($notPassed > 0) {
+                return redirect()->route('admission.exam')
+                    ->with('error', 'Some selected applicants have not passed the exam.');
+            }
+
+            // Update applicants to interview status
+            Applicant::whereIn('id', function($query) use ($admissionIds) {
+                $query->select('applicant_id')
+                      ->from('admissions')
+                      ->whereIn('id', $admissionIds);
+            })->update(['status' => 'interview']);
+
+            // Update admission records
+            Admission::whereIn('id', $admissionIds)->update([
+                'interview_schedule_id' => $scheduleId,
+                'interview_result' => 'pending',
+            ]);
+            
+            return redirect()->route('admission.exam')
+                ->with('success', "{$count} applicant(s) marked for interview successfully.");
+                
+        } elseif ($action === 'markForEvaluation') {
+            // Check if all applicants passed the exam
+            $notPassed = Admission::whereIn('id', $admissionIds)
+                ->where('exam_result', '!=', 'passed')
+                ->count();
+            if ($notPassed > 0) {
+                return redirect()->route('admission.exam')
+                    ->with('error', 'Some selected applicants have not passed the exam.');
+            }
+
+            // Update applicants to evaluation status
+            Applicant::whereIn('id', function($query) use ($admissionIds) {
+                $query->select('applicant_id')
+                      ->from('admissions')
+                      ->whereIn('id', $admissionIds);
+            })->update(['status' => 'evaluation']);
+
+            // Update admission records with final score
+            foreach ($admissionIds as $admissionId) {
+                $admission = Admission::find($admissionId);
+                $admission->update([
+                    'final_score' => ($admission->interview_score ?? 0) + ($admission->exam_score ?? 0),
+                ]);
+            }
+            
+            return redirect()->route('admission.exam')
+                ->with('success', "{$count} applicant(s) marked for evaluation successfully.");
+        }
+
+        return redirect()->route('admission.exam')
+            ->with('error', 'Invalid action.');
+    }
+
+    /**
+     * Handle actions from evaluation page (reschedule evaluation, admit)
+     */
+    public function processEvaluationAction(Request $request)
+    {
+        $validated = $request->validate([
+            'action' => 'required|in:reschedule,admit',
+            'schedule_id' => 'required_if:action,reschedule|nullable|exists:schedules,id',
+            'applicant_ids' => 'required|array|min:1',
+            'applicant_ids.*' => 'exists:admissions,id',
+        ]);
+
+        $action = $validated['action'];
+        $admissionIds = $validated['applicant_ids'];
+        $scheduleId = $validated['schedule_id'] ?? null;
+        $count = count($admissionIds);
+
+        if ($action === 'reschedule') {
+            // Reschedule evaluation - just update the evaluation schedule
+            Admission::whereIn('id', $admissionIds)->update([
+                'evaluation_schedule_id' => $scheduleId,
+            ]);
+            return redirect()->route('admission.evaluation')
+                ->with('success', "{$count} applicant(s) rescheduled successfully.");
+                
+        } elseif ($action === 'admit') {
+            // Use existing admitStudents logic
+            return $this->admitStudents($request);
+        }
+
+        return redirect()->route('admission.evaluation')
+            ->with('error', 'Invalid action.');
     }
 
     public function updateInterview(Request $request, $id)
@@ -54,61 +280,6 @@ class AdmissionProcessController extends Controller
                 'message' => 'Failed to update interview: ' . $e->getMessage(),
             ], 500);
         }
-    }
-
-    public function markForExam(Request $request){
-        $validated = $request->validate([
-            'schedule_id' => 'required|exists:schedules,id',
-            'applicant_ids' => 'required|array|min:1',
-            'applicant_ids.*' => 'exists:admissions,id',
-        ]);
-
-        // check if applicants in admission has someone not passed the exam
-        $ifNotPassed = Admission::whereIn('id', $validated['applicant_ids'])
-            ->where('interview_result', '!=', 'passed')
-            ->count();
-        if($ifNotPassed > 0){
-            return redirect()->route('admission.interview')
-                ->with('error', 'Some selected applicants have not passed the interview.');
-        }
-
-        // Update all selected applicants using admission id to 'exam' status
-
-        Applicant::whereIn('id', function($query) use ($validated) {
-                $query->select('applicant_id')
-                      ->from('admissions')
-                      ->whereIn('id', $validated['applicant_ids']);
-            })
-            ->update([
-                'status' => 'exam',
-            ]);
-
-        // Update admission records for each applicant
-        foreach($validated['applicant_ids'] as $applicantId){
-            $admission = Admission::find($applicantId);
-            $admission->update([
-                'exam_schedule_id' => $validated['schedule_id'],
-                'exam_result' => 'pending',
-            ]);
-        }
-
-        $count = count($validated['applicant_ids']);
-        
-        return redirect()->route('admission.interview')
-            ->with('success', "{$count} applicant(s) marked for interview successfully.");
-    }
-
-    public function showExam()
-    {
-        $applicants = Admission::with(['applicant', 'examSchedule'])
-            ->whereHas('applicant', function ($query) {
-                $query->where('status', 'exam');
-            })
-            ->paginate(20);
-
-        return view('admission.entrance_exam', [
-            'applicants' => $applicants,
-        ]);    
     }
 
     public function updateExam(Request $request, $id)
@@ -144,59 +315,6 @@ class AdmissionProcessController extends Controller
                 'message' => 'Failed to update exam scores: ' . $e->getMessage(),
             ], 500);
         }
-    }
-
-    public function markForEvaluation(Request $request){
-        $validated = $request->validate([
-            'applicant_ids' => 'required|array|min:1',
-            'applicant_ids.*' => 'exists:admissions,id',
-        ]);
-
-        // check if applicants in admission has someone not passed the exam
-        $ifNotPassed = Admission::whereIn('id', $validated['applicant_ids'])
-            ->where('exam_result', '!=', 'passed')
-            ->count();
-        if($ifNotPassed > 0){
-            return redirect()->route('admission.exam')
-                ->with('error', 'Some selected applicants have not passed the exam.');
-        }
-
-        // Update all selected applicants using admission id to 'exam' status
-        Applicant::whereIn('id', function($query) use ($validated) {
-                $query->select('applicant_id')
-                      ->from('admissions')
-                      ->whereIn('id', $validated['applicant_ids']);
-            })
-            ->update([
-                'status' => 'evaluation',
-            ]);
-
-        // Update admission records for each applicant
-        foreach($validated['applicant_ids'] as $applicantId){
-            $admission = Admission::find($applicantId);
-            $admission->update([
-                'final_score' => $admission->interview_score + $admission->exam_score,
-            ]);
-        }
-
-        $count = count($validated['applicant_ids']);
-        
-        return redirect()->route('admission.exam')
-            ->with('success', "{$count} applicant(s) marked for interview successfully.");
-    }
-
-    public function showEvaluation()
-    {
-        $applicants = Admission::with(['applicant'])
-            ->where('final_score', '!=', null)
-            ->whereHas('applicant', function ($query) {
-                $query->where('status', 'evaluation');
-            })
-            ->paginate(20);
-
-        return view('admission.final_eval', [
-            'applicants' => $applicants,
-        ]);    
     }
 
     public function updateEvaluation(Request $request, $id)
@@ -292,4 +410,5 @@ class AdmissionProcessController extends Controller
         return redirect()->route('admission.evaluation')
             ->with($admittedCount > 0 ? 'success' : 'error', $message);
     }
+
 }
