@@ -80,7 +80,7 @@
                             <button 
                                 type="button" 
                                 class="btn btn-sm btn-ghost text-primary"
-                                onclick="openApplicantModal({{ json_encode($applicant) }})"
+                                onclick="openApplicantModal({{ json_encode($applicant) }}, {{ json_encode($applicant->admission) }})"
                             >
                                 View Details
                             </button>

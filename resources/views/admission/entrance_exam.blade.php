@@ -77,7 +77,7 @@
                             <button 
                                 type="button" 
                                 class="btn btn-sm btn-ghost text-primary"
-                                onclick="openApplicantModal({{ json_encode($applicant->applicant) }})">
+                                onclick="openApplicantModal({{ json_encode($applicant->applicant) }}, {{ json_encode($applicant) }})">
                                 View Details
                             </button>
                             <button 

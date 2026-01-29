@@ -67,6 +67,7 @@ return new class extends Migration
             $table->string("college_inclusive_years");
             $table->integer("lrn");
             $table->string("status")->enum(['pending', 'interviewed', 'exam_passed', 'rejected', 'accepted'], 'pending');
+            $table->string("reject_reason")->nullable();
         });
     }
 

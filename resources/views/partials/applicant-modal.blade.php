@@ -25,6 +25,37 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Admission Process -->
+        <div class="bg-gray-100 p-4 rounded-lg mb-4">
+            <h4 class="font-semibold text-lg mb-3 text-primary">Admission Process</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <span class="text-sm text-gray-500">Interview Score</span>
+                    <p class="font-medium" id="modal_interview_score">-</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Examination Score</span>
+                    <p class="font-medium" id="modal_examination_score">-</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Evaluation Score</span>
+                    <p class="font-medium" id="modal_evaluation_score">-</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Interview Remarks</span>
+                    <p class="font-medium" id="modal_interview_remarks">-</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Examination Remarks</span>
+                    <p class="font-medium" id="modal_examination_remarks">-</p>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-500">Evaluation Remarks</span>
+                    <p class="font-medium" id="modal_evaluation_remarks">-</p>
+                </div>
+            </div>
+        </div>
 
         <!-- Academic Preferences -->
         <div class="bg-blue-50 p-4 rounded-lg mb-4">
@@ -299,7 +330,7 @@
 </dialog>
 
 <script>
-    function openApplicantModal(applicant) {
+    function openApplicantModal(applicant, admission) {
         // Application Info
         document.getElementById('modal_application_no').textContent = applicant.application_no || '-';
         document.getElementById('modal_lrn').textContent = applicant.lrn || '-';
@@ -326,6 +357,14 @@
         document.getElementById('modal_first_program_choice').textContent = applicant.first_program_choice || '-';
         document.getElementById('modal_second_program_choice').textContent = applicant.second_program_choice || '-';
         document.getElementById('modal_third_program_choice').textContent = applicant.third_program_choice || '-';
+
+        // Admission Process
+        document.getElementById('modal_interview_score').textContent = admission?.interview_score || '-';
+        document.getElementById('modal_examination_score').textContent = admission?.exam_score || '-';
+        document.getElementById('modal_evaluation_score').textContent = admission?.final_score || '-';
+        document.getElementById('modal_interview_remarks').textContent = (!admission?.interview_result || admission?.interview_result === 'pending') ? '-' : admission.interview_result;
+        document.getElementById('modal_examination_remarks').textContent = (!admission?.exam_result || admission?.exam_result === 'pending') ? '-' : admission.exam_result;
+        document.getElementById('modal_evaluation_remarks').textContent = (!admission?.decision || admission?.decision === 'pending') ? '-' : admission.decision;
 
         // Personal Information
         document.getElementById('modal_last_name').textContent = applicant.last_name || '-';

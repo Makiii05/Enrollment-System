@@ -57,9 +57,10 @@ class Applicant extends Model
         "college_inclusive_years",
         "lrn",
         "status",
+        "reject_reason",
     ];
 
-    public function addmission()
+    public function admission()
     {
         return $this->hasOne(Admission::class);
     } 

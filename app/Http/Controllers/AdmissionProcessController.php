@@ -260,8 +260,16 @@ class AdmissionProcessController extends Controller
                 'interview_result' => 'required|in:pending,passed,failed',
             ]);
 
-            $admission = Admission::findOrFail($id);
+            $admission = Admission::with('applicant')->findOrFail($id);
             $admission->update($validated);
+
+            // Update applicant reject_reason if failed
+            if ($validated['interview_result'] === 'failed') {
+                $admission->applicant->update(['reject_reason' => 'Failed on Interview']);
+            } elseif ($validated['interview_result'] === 'passed') {
+                // Clear reject_reason if passed (in case it was previously failed)
+                $admission->applicant->update(['reject_reason' => null]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -295,8 +303,16 @@ class AdmissionProcessController extends Controller
                 'exam_result' => 'required|in:pending,passed,failed',
             ]);
 
-            $admission = Admission::findOrFail($id);
+            $admission = Admission::with('applicant')->findOrFail($id);
             $admission->update($validated);
+
+            // Update applicant reject_reason if failed
+            if ($validated['exam_result'] === 'failed') {
+                $admission->applicant->update(['reject_reason' => 'Failed on Examination']);
+            } elseif ($validated['exam_result'] === 'passed') {
+                // Clear reject_reason if passed (in case it was previously failed)
+                $admission->applicant->update(['reject_reason' => null]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -325,7 +341,7 @@ class AdmissionProcessController extends Controller
                 'program' => 'required_if:decision,accepted|nullable|exists:programs,id',
             ]);
 
-            $admission = Admission::findOrFail($id);
+            $admission = Admission::with('applicant')->findOrFail($id);
             
             $updateData = [
                 'decision' => $validated['decision'],
@@ -336,6 +352,11 @@ class AdmissionProcessController extends Controller
             // Only set program_id if accepted
             if ($validated['decision'] === 'accepted') {
                 $updateData['program_id'] = $validated['program'];
+                // Clear reject_reason if accepted
+                $admission->applicant->update(['reject_reason' => null]);
+            } else {
+                // Update applicant reject_reason if rejected
+                $admission->applicant->update(['reject_reason' => 'Rejected on Final Evaluation']);
             }
 
             $admission->update($updateData);
