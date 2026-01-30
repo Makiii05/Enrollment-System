@@ -22,7 +22,12 @@
                     <label class="label">
                         <span class="label-text">Proctor</span>
                     </label>
-                    <input type="text" name="proctor" class="input input-bordered w-full" placeholder="Enter proctor name" required>
+                    <select name="proctor" class="select select-bordered w-full" required>
+                        <option value="">Select Proctor</option>
+                        @foreach($proctors as $proctor)
+                            <option value="{{ $proctor->name }}">{{ $proctor->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
 
                 <div class="form-control">
@@ -141,7 +146,13 @@
     </div>
     
     <script>
+        const proctorsList = @json($proctors);
+        
         function editSchedule(id, proctor, date, start_time, end_time, status, process) {
+            const proctorOptions = proctorsList.map(p => 
+                `<option value="${p.name}" ${p.name === proctor ? 'selected' : ''}>${p.name}</option>`
+            ).join('');
+            
             document.getElementById('form_modal').innerHTML = `
                 <div class="modal-box w-11/12 max-w-5xl">
                     <form method="dialog">
@@ -155,7 +166,10 @@
                             <label class="label">
                                 <span class="label-text">Proctor</span>
                             </label>
-                            <input type="text" name="proctor" class="input input-bordered w-full" value="${proctor}" required>
+                            <select name="proctor" class="select select-bordered w-full" required>
+                                <option value="">Select Proctor</option>
+                                ${proctorOptions}
+                            </select>
                         </div>
 
                         <div class="form-control">

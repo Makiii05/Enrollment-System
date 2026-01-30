@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use App\Models\Schedule;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ScheduleController extends Controller
@@ -22,8 +23,12 @@ class ScheduleController extends Controller
             return $schedule;
         });
 
+        // Get users with proctor role
+        $proctors = User::where('role', 'proctor')->orderBy('name')->get();
+
         return view('admission.schedule', [
-            'schedules' => $schedules
+            'schedules' => $schedules,
+            'proctors' => $proctors
         ]);
     }
 

@@ -17,6 +17,7 @@ use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -126,5 +127,21 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::get('/student', [StudentController::class, 'showStudent'])->name('student');
         Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
         Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
+    });
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+
+    // Protected routes - require authentication and admin type
+    Route::middleware(['auth', 'can:access-admin'])->group(function () {
+        Route::get('/dashboard', [AdminController::class, 'showDashboard'])->name('dashboard');
+
+        Route::get('/users', [AdminController::class, 'showUsers'])->name('users');
+        Route::post('/users', [AdminController::class, 'createUser'])->name('users.create');
+        Route::post('/users/{id}/update', [AdminController::class, 'updateUser'])->name('users.update');
+        Route::post('/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('users.delete');
     });
 });
