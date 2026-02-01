@@ -11,7 +11,16 @@ class ScheduleController extends Controller
 {
     public function showSchedule()
     {
-        $schedules = Schedule::orderBy('date', 'desc')->orderBy('start_time', 'asc')->paginate(10);
+        $user = auth()->user();
+        
+        // If user is a proctor, only show their schedules
+        $query = Schedule::orderBy('date', 'desc')->orderBy('start_time', 'asc');
+        
+        if ($user->role === 'proctor') {
+            $query->where('proctor_id', $user->id);
+        }
+        
+        $schedules = $query->paginate(10);
         
         // Get applicants for each schedule
         $schedules->getCollection()->transform(function ($schedule) {
@@ -35,7 +44,7 @@ class ScheduleController extends Controller
     public function createSchedule(Request $request)
     {
         $request->validate([
-            'proctor' => 'required|string|max:255',
+            'proctor_id' => 'required|exists:users,id',
             'date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -44,7 +53,7 @@ class ScheduleController extends Controller
         ]);
 
         Schedule::create([
-            'proctor' => $request->proctor,
+            'proctor_id' => $request->proctor_id,
             'date' => $request->date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
@@ -60,7 +69,7 @@ class ScheduleController extends Controller
         $schedule = Schedule::findOrFail($id);
 
         $request->validate([
-            'proctor' => 'required|string|max:255',
+            'proctor_id' => 'required|exists:users,id',
             'date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
             'end_time' => 'required|date_format:H:i|after:start_time',
@@ -69,7 +78,7 @@ class ScheduleController extends Controller
         ]);
 
         $schedule->update([
-            'proctor' => $request->proctor,
+            'proctor_id' => $request->proctor_id,
             'date' => $request->date,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,

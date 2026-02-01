@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Schedule extends Model
 {
     protected $fillable = [
-        'proctor',
+        'proctor_id',
         'date',
         'start_time',
         'end_time',
@@ -21,6 +21,10 @@ class Schedule extends Model
         'end_time' => 'datetime:H:i',
     ];
 
+    public function proctor()
+    {
+        return $this->belongsTo(User::class, 'proctor_id');
+    }
 
     public function admissions()
     {

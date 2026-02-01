@@ -6,6 +6,7 @@
 
     @include('partials.notifications')
     @include('partials.schedule-applicants-modal')
+    @if(auth()->user()->role == 'head')
     <div class="m-4 grid">
         <button class="btn w-auto justify-self-end bg-white shadow" onclick="form_modal.showModal()">Add Schedule</button>
     </div>
@@ -22,10 +23,10 @@
                     <label class="label">
                         <span class="label-text">Proctor</span>
                     </label>
-                    <select name="proctor" class="select select-bordered w-full" required>
+                    <select name="proctor_id" class="select select-bordered w-full" required>
                         <option value="">Select Proctor</option>
                         @foreach($proctors as $proctor)
-                            <option value="{{ $proctor->name }}">{{ $proctor->name }}</option>
+                            <option value="{{ $proctor->id }}">{{ $proctor->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -81,6 +82,7 @@
             </form>
         </div>
     </dialog>
+    @endif
     <!--TABLE-->
     <div class="overflow-x-auto bg-white shadow">
         <table class="table">
@@ -102,7 +104,7 @@
                 @foreach ($schedules as $schedule)
                 <tr>
                     <td>{{$schedule->id}}</td>
-                    <td>{{$schedule->proctor}}</td>
+                    <td>{{ $schedule->proctor?->name ?? 'N/A' }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->date)->format('M d, Y') }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}</td>
                     <td>{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}</td>
@@ -110,31 +112,46 @@
                     <td>{{ $schedule->applicants->count() }}</td>
                     <td>{{ $schedule->status }}</td>
                     <td class="flex gap-2 items-center">
-                        <button 
-                            class="text-blue-600 hover:underline"
-                            onclick="showScheduleApplicants(
-                                {{ $schedule->id }}, 
-                                '{{ $schedule->proctor }}', 
-                                '{{ \Carbon\Carbon::parse($schedule->date)->format('M d, Y') }}', 
-                                '{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}', 
-                                '{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}', 
-                                '{{ $schedule->process }}',
-                                '{{ $schedule->applicants->map(fn($a) => [
-                                    'application_no' => $a->application_no,
-                                    'last_name' => $a->last_name,
-                                    'first_name' => $a->first_name,
-                                    'middle_name' => $a->middle_name,
-                                    'email' => $a->email,
-                                    'mobile_number' => $a->mobile_number,
-                                    'status' => $a->status
-                                ])->values()->toJson() }}'
-                            )"
-                        >view</button>
-                        <button class="text-green-600 hover:underline" onclick="editSchedule({{ $schedule->id }}, '{{ $schedule->proctor }}', '{{ $schedule->date->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}', '{{ $schedule->status }}', '{{ $schedule->process }}')">edit</button>
+                        @if(auth()->user()->role === 'proctor')
+                            {{-- Proctor: redirect to appropriate process page --}}
+                            @php
+                                $redirectRoute = match($schedule->process) {
+                                    'exam' => route('admission.exam'),
+                                    'interview' => route('admission.interview'),
+                                    'evaluation' => route('admission.evaluation'),
+                                    default => route('admission.exam'),
+                                };
+                            @endphp
+                            <a href="{{ $redirectRoute }}?schedule_id={{ $schedule->id }}" class="text-blue-600 hover:underline">view</a>
+                        @else
+                            <button 
+                                class="text-blue-600 hover:underline"
+                                onclick="showScheduleApplicants(
+                                    {{ $schedule->id }}, 
+                                    '{{ $schedule->proctor?->name ?? 'N/A' }}', 
+                                    '{{ \Carbon\Carbon::parse($schedule->date)->format('M d, Y') }}', 
+                                    '{{ \Carbon\Carbon::parse($schedule->start_time)->format('h:i A') }}', 
+                                    '{{ \Carbon\Carbon::parse($schedule->end_time)->format('h:i A') }}', 
+                                    '{{ $schedule->process }}',
+                                    '{{ $schedule->applicants->map(fn($a) => [
+                                        'application_no' => $a->application_no,
+                                        'last_name' => $a->last_name,
+                                        'first_name' => $a->first_name,
+                                        'middle_name' => $a->middle_name,
+                                        'email' => $a->email,
+                                        'mobile_number' => $a->mobile_number,
+                                        'status' => $a->status
+                                    ])->values()->toJson() }}'
+                                )"
+                            >view</button>
+                        @endif
+                        @if(auth()->user()->role == 'head')
+                        <button class="text-green-600 hover:underline" onclick="editSchedule({{ $schedule->id }}, {{ $schedule->proctor_id ?? 'null' }}, '{{ $schedule->date->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}', '{{ $schedule->status }}', '{{ $schedule->process }}')">edit</button>
                         <form action="{{ route('admission.schedule.delete', $schedule->id) }}" method="POST" style="display:inline;">
                             @csrf
                             <button type="submit" class="text-red-600 hover:underline" onclick="return confirm('Are you sure?')">delete</button>
                         </form>
+                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -148,9 +165,9 @@
     <script>
         const proctorsList = @json($proctors);
         
-        function editSchedule(id, proctor, date, start_time, end_time, status, process) {
+        function editSchedule(id, proctorId, date, start_time, end_time, status, process) {
             const proctorOptions = proctorsList.map(p => 
-                `<option value="${p.name}" ${p.name === proctor ? 'selected' : ''}>${p.name}</option>`
+                `<option value="${p.id}" ${p.id === proctorId ? 'selected' : ''}>${p.name}</option>`
             ).join('');
             
             document.getElementById('form_modal').innerHTML = `
@@ -166,7 +183,7 @@
                             <label class="label">
                                 <span class="label-text">Proctor</span>
                             </label>
-                            <select name="proctor" class="select select-bordered w-full" required>
+                            <select name="proctor_id" class="select select-bordered w-full" required>
                                 <option value="">Select Proctor</option>
                                 ${proctorOptions}
                             </select>
