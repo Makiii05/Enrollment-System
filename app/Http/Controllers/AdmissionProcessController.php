@@ -9,40 +9,58 @@ use App\Http\Controllers\StudentController;
 
 class AdmissionProcessController extends Controller
 {
-    public function showInterview()
+    public function showInterview(Request $request)
     {
-        $applicants = Admission::with(['applicant', 'interviewSchedule'])
+        $query = Admission::with(['applicant', 'interviewSchedule'])
             ->whereHas('applicant', function ($query) {
                 $query->where('status', 'interview');
-            })
-            ->paginate(20);
+            });
+        
+        // Filter by schedule_id if provided (for proctor view)
+        if ($request->has('schedule_id')) {
+            $query->where('interview_schedule_id', $request->schedule_id);
+        }
+        
+        $applicants = $query->paginate(20);
             
         return view('admission.interview', [
             'applicants' => $applicants,
         ]);
     }
 
-    public function showExam()
+    public function showExam(Request $request)
     {
-        $applicants = Admission::with(['applicant', 'examSchedule'])
+        $query = Admission::with(['applicant', 'examSchedule'])
             ->whereHas('applicant', function ($query) {
                 $query->where('status', 'exam');
-            })
-            ->paginate(20);
+            });
+        
+        // Filter by schedule_id if provided (for proctor view)
+        if ($request->has('schedule_id')) {
+            $query->where('exam_schedule_id', $request->schedule_id);
+        }
+        
+        $applicants = $query->paginate(20);
 
         return view('admission.entrance_exam', [
             'applicants' => $applicants,
         ]);    
     }
     
-    public function showEvaluation()
+    public function showEvaluation(Request $request)
     {
-        $applicants = Admission::with(['applicant', 'evaluationSchedule'])
+        $query = Admission::with(['applicant', 'evaluationSchedule'])
             ->where('final_score', '!=', null)
             ->whereHas('applicant', function ($query) {
                 $query->where('status', 'evaluation');
-            })
-            ->paginate(20);
+            });
+        
+        // Filter by schedule_id if provided (for proctor view)
+        if ($request->has('schedule_id')) {
+            $query->where('evaluation_schedule_id', $request->schedule_id);
+        }
+        
+        $applicants = $query->paginate(20);
 
         return view('admission.final_eval', [
             'applicants' => $applicants,
