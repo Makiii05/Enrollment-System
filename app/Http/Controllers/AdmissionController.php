@@ -49,8 +49,4 @@ class AdmissionController extends Controller
         return redirect()->route('admission.login');
     }
 
-    public function showDashboard(){
-        return view('admission.dashboard');
-    }
-
 }

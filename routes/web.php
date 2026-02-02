@@ -18,6 +18,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -99,7 +100,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
 
     // Protected routes - require authentication and admission type
     Route::middleware(['auth', 'can:access-admission'])->group(function () {
-        Route::get('/dashboard', [AdmissionController::class, 'showDashboard'])->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'admissionDashboard'])->name('dashboard');
 
         Route::get('/applicant', [ApplicantController::class, 'showApplicant'])->name('applicant');
         
