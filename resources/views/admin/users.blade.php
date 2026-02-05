@@ -94,6 +94,9 @@
                         <option value="registrar">Registrar</option>
                         <option value="admission">Admission</option>
                         <option value="accounting">Accounting</option>
+                        @foreach($departments as $department)
+                            <option value="{{ $department->code }}">{{ $department->code }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-control mb-4">
@@ -159,6 +162,9 @@
                         <option value="registrar">Registrar</option>
                         <option value="admission">Admission</option>
                         <option value="accounting">Accounting</option>
+                        @foreach($departments as $department)
+                            <option value="{{ $department->code }}">{{ $department->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-control mb-4">

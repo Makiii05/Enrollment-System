@@ -3,12 +3,20 @@
     @include('partials.notifications')
     @include('partials.applicant-modal')
     @include('partials.edit-exam-modal')
+    @include('partials.print-list-modal')
 
     <form id="examForm" action="{{ route('admission.exam.process-action') }}" method="POST">
         @csrf
         
         <div class="flex items-center gap-4 mb-4">
             <h2 class="font-bold text-4xl flex-1">Applicant (for examination)</h2>
+            <button 
+                type="button" 
+                class="btn btn-outline"
+                onclick="openPrintModal('{{ route('admission.print.exam.list') }}')"
+            >
+                Print
+            </button>
             <select name="action" id="actionSelect" class="select select-bordered" required>
                 <option value="">Select Action</option>
                 <option value="reschedule">Reschedule Exam</option>

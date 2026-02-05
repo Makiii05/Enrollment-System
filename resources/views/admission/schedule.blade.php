@@ -123,6 +123,7 @@
                                 };
                             @endphp
                             <a href="{{ $redirectRoute }}?schedule_id={{ $schedule->id }}" class="text-blue-600 hover:underline">view</a>
+                            <a href="{{ route('admission.print.schedule.applicants', $schedule->id) }}" target="_blank" class="text-purple-600 hover:underline">print</a>
                         @else
                             <button 
                                 class="text-blue-600 hover:underline"
@@ -144,6 +145,7 @@
                                     ])->values()->toJson() }}'
                                 )"
                             >view</button>
+                            <a href="{{ route('admission.print.schedule.applicants', $schedule->id) }}" target="_blank" class="text-purple-600 hover:underline">print</a>
                         @endif
                         @if(auth()->user()->role == 'head')
                         <button class="text-green-600 hover:underline" onclick="editSchedule({{ $schedule->id }}, {{ $schedule->proctor_id ?? 'null' }}, '{{ $schedule->date->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}', '{{ $schedule->status }}', '{{ $schedule->process }}')">edit</button>

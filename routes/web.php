@@ -19,6 +19,7 @@ use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PdfController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -128,6 +129,13 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::get('/student', [StudentController::class, 'showStudent'])->name('student');
         Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
         Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
+        
+        Route::get('/print-admission-stats', [PdfController::class, 'printAdmissionStats'])->name('print.admission.stats');
+        Route::get('/print-applicant-details/{id}', [PdfController::class, 'printApplicantDetails'])->name('print.applicant.details');
+        Route::get('/print-interview-list', [PdfController::class, 'printInterviewList'])->name('print.interview.list');
+        Route::get('/print-exam-list', [PdfController::class, 'printExamList'])->name('print.exam.list');
+        Route::get('/print-evaluation-list', [PdfController::class, 'printEvaluationList'])->name('print.evaluation.list');
+        Route::get('/print-schedule-applicants/{id}', [PdfController::class, 'printScheduleApplicants'])->name('print.schedule.applicants');
     });
 });
 

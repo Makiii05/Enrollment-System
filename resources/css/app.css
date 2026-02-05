@@ -12,3 +12,8 @@
 @plugin "daisyui"{
   themes: light --default;
 };
+
+/* Global text scaling for lower resolution displays */
+html {
+    font-size: 75%;
+}

@@ -77,16 +77,18 @@
                         <td>{{$applicant->first_name}} {{$applicant->last_name}}</td>
                         <td>{{$applicant->status}}</td>
                         <td>
-                            <button 
-                                type="button" 
+                            <a href="{{ route('admission.print.applicant.details', ['id' => $applicant->id]) }}" target="_blank" type="button" 
+                                class="btn btn-sm btn-ghost text-success">
+                                Print
+                            </a>
+                            <button type="button" 
                                 class="btn btn-sm btn-ghost text-primary"
                                 onclick="openApplicantModal({{ json_encode($applicant) }}, {{ json_encode($applicant->admission) }})"
                             >
                                 View Details
                             </button>
                             @if($applicant->status !== 'admitted')
-                            <button 
-                                type="button" 
+                            <button type="button" 
                                 class="btn btn-sm btn-ghost text-red-600"
                                 onclick="confirmSingleDelete({{ $applicant->id }}, '{{ $applicant->first_name }} {{ $applicant->last_name }}')"
                             >

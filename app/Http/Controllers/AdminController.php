@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Department;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -59,9 +60,11 @@ class AdminController extends Controller
     public function showUsers()
     {
         $users = User::orderBy('created_at', 'desc')->paginate(20);
+        $departments = Department::all();
 
         return view('admin.users', [
             'users' => $users,
+            'departments' => $departments,
         ]);
     }
 
@@ -70,7 +73,7 @@ class AdminController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'type' => 'required|in:admin,registrar,admission,accounting',
+            'type' => 'required|in:admin,registrar,admission,accounting,' . implode(',', Department::pluck('code')->toArray()),
             'role' => 'required|in:head,proctor',
             'password' => 'required|string|min:8|confirmed',
         ]);

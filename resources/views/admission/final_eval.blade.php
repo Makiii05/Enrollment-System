@@ -3,12 +3,20 @@
     @include('partials.notifications')
     @include('partials.applicant-modal')
     @include('partials.final-evaluation-modal')
+    @include('partials.print-list-modal')
 
     <form id="evalForm" action="{{ route('admission.evaluation.process-action') }}" method="POST">
         @csrf
         
         <div class="flex items-center gap-4 mb-4">
             <h2 class="font-bold text-4xl flex-1">Applicant (for evaluation)</h2>
+            <button 
+                type="button" 
+                class="btn btn-outline"
+                onclick="openPrintModal('{{ route('admission.print.evaluation.list') }}')"
+            >
+                Print
+            </button>
             <select name="action" id="actionSelect" class="select select-bordered" required>
                 <option value="">Select Action</option>
                 <option value="reschedule">Reschedule Evaluation</option>

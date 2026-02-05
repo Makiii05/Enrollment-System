@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Admission;
 use App\Models\Applicant;
+use App\Models\Level;
 use App\Http\Controllers\StudentController;
 
 class AdmissionProcessController extends Controller
@@ -22,9 +23,11 @@ class AdmissionProcessController extends Controller
         }
         
         $applicants = $query->paginate(20);
+        $levels = Level::orderBy('program_id')->get();
             
         return view('admission.interview', [
             'applicants' => $applicants,
+            'levels' => $levels,
         ]);
     }
 
@@ -41,9 +44,11 @@ class AdmissionProcessController extends Controller
         }
         
         $applicants = $query->paginate(20);
+        $levels = Level::orderBy('program_id')->get();
 
         return view('admission.entrance_exam', [
             'applicants' => $applicants,
+            'levels' => $levels,
         ]);    
     }
     
@@ -61,9 +66,11 @@ class AdmissionProcessController extends Controller
         }
         
         $applicants = $query->paginate(20);
+        $levels = Level::orderBy('program_id')->get();
 
         return view('admission.final_eval', [
             'applicants' => $applicants,
+            'levels' => $levels,
         ]);    
     }
 
