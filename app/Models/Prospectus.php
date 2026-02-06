@@ -9,7 +9,6 @@ class Prospectus extends Model
     protected $fillable = [
         "curriculum_id",
         "subject_id",
-        "academic_term_id",
         "level_id",
         "status",
     ];
@@ -20,10 +19,6 @@ class Prospectus extends Model
 
     public function subject(){
         return $this->belongsTo(Subject::class);
-    }
-
-    public function academicTerm(){
-        return $this->belongsTo(AcademicTerm::class);
     }
 
     public function level(){

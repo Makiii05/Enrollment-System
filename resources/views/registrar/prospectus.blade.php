@@ -5,7 +5,7 @@
     </div>
 
     <div class="m-4 flex">
-        <form action="{{ route('registrar.prospectus.search') }}" method="POST" class="grow">
+        <form action="{{ route('registrar.prospectus.search') }}" method="POST" class="grow flex gap-2 items-center">
             @csrf
             <select name="department" id="departmentSelect" class="select select-bordered" required>
                 <option value="">--Select Department--</option>
@@ -13,13 +13,8 @@
                 <option value="{{ $department->id }}" @if(isset($old_department) && $old_department == $department->id) selected @endif>{{ $department->description }}</option>
                 @endforeach
             </select>
-            <select name="academic_year" id="academicTermSelect" class="select select-bordered" required>
-                <option value="">--Select Academic Year--</option>
-                <option value="2025-2026" @if(isset($old_academic_year) && $old_academic_year == "2025-2026") selected @endif>2025-2026</option>
-                <option value="2026-2027" @if(isset($old_academic_year) && $old_academic_year == "2026-2027") selected @endif>2026-2027</option>
-                <option value="2027-2028" @if(isset($old_academic_year) && $old_academic_year == "2027-2028") selected @endif>2027-2028</option>
-                <option value="2028-2029" @if(isset($old_academic_year) && $old_academic_year == "2028-2029") selected @endif>2028-2029</option>
-                <option value="2029-2030" @if(isset($old_academic_year) && $old_academic_year == "2029-2030") selected @endif>2029-2030</option>
+            <select name="curriculum" id="curriculumSelect" class="select select-bordered" required>
+                <option value="">--Select Curriculum--</option>
             </select>
             <button type="submit" class="btn bg-white">Search</button>
         </form>
@@ -43,19 +38,7 @@
                     </label>
                     <select name="curriculum" id="addModalCurriculum" class="select select-bordered w-full">
                         @foreach ($curricula as $curriculum)
-                        <option value="{{ $curriculum->id }}">{{ $curriculum->curriculum }} - {{$curriculum->department->description}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Academic Term</span>
-                    </label>
-                    <select name="academic_term" id="addModalAcademicTerm" class="select select-bordered w-full">
-                        <option value="">--Select Academic Term--</option>
-                        @foreach ($academicTerms as $academicTerm)
-                        <option value="{{ $academicTerm->id }}" data-department-id="{{ $academicTerm->department_id }}">{{ $academicTerm->department->code }} - {{ $academicTerm->code }}</option>
+                        <option value="{{ $curriculum->id }}" data-department-id="{{ $curriculum->department_id }}">{{ $curriculum->curriculum }} - {{$curriculum->department->description}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -65,7 +48,7 @@
                         <span class="label-text">Level</span>
                     </label>
                     <select id="addModalLevelSelect" name="level" class="select select-bordered w-full">
-                        <option value="">--Select Academic Term First--</option>
+                        <option value="">--Select Curriculum First--</option>
                     </select>
                 </div>
                 
@@ -105,61 +88,53 @@
         <div id="prospectusContainer">
         @if ($prospectuses->count() > 0)
         <div class="m-4">
-            @foreach ($prospectuses->groupBy('academic_term_id') as $academicTermId => $groupedByTerm)
+            @foreach ($prospectuses->groupBy('level_id') as $levelId => $groupedByLevel)
             @php
-                $academicTerm = $groupedByTerm->first()->academicTerm;
+                $level = $groupedByLevel->first()->level;
             @endphp
-            <div class="mb-8">
-                <h3 class="text-lg font-bold mb-4">{{ $academicTerm->department->code }} - {{ $academicTerm->description }}</h3>
-                @foreach ($groupedByTerm->groupBy('level_id') as $levelId => $groupedByLevel)
-                @php
-                    $level = $groupedByLevel->first()->level;
-                @endphp
-                <details class="collapse bg-base-100 border-base-300 border mb-3">
-                    <summary class="collapse-title font-semibold">{{ $level->program->code}} - {{ $level->description }}</summary>
-                    <div class="collapse-content text-sm">
-                        <table class="table table-zebra">
-                            <thead>
-                                <tr>
-                                    <th>Curriculum</th>
-                                    <th>Code</th>
-                                    <th>Description</th>
-                                    <th>Lec Hour</th>
-                                    <th>Lab Hour</th>
-                                    <th>Lec Unit</th>
-                                    <th>Lab Unit</th>
-                                    <th>Total Unit</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($groupedByLevel as $prospectus)
-                                <tr data-prospectus-id="{{ $prospectus->id }}">
-                                    <td>{{ $prospectus->curriculum->curriculum }}</td>
-                                    <td>{{ $prospectus->subject->code }}</td>
-                                    <td>{{ $prospectus->subject->description }}</td>
-                                    <td>{{ $prospectus->subject->lech }}</td>
-                                    <td>{{ $prospectus->subject->labh }}</td>
-                                    <td>{{ $prospectus->subject->lecu }}</td>
-                                    <td>{{ $prospectus->subject->labu }}</td>
-                                    <td>{{ $prospectus->subject->unit }}</td>
-                                    <td>{{ $prospectus->status }}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-ghost edit-btn" data-id="{{ $prospectus->id }}" onclick="openEditModal({{ $prospectus->id }})">Edit</button>
-                                        <button type="button" class="btn btn-sm btn-ghost text-red-500 delete-btn" data-id="{{ $prospectus->id }}" onclick="deleteProspectus({{ $prospectus->id }}, this)">
-                                            <span class="loading loading-spinner loading-sm hidden"></span>
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </details>
-                @endforeach
-            </div>
+            <details class="collapse bg-base-100 border-base-300 border mb-3">
+                <summary class="collapse-title font-semibold">{{ $level->program->code}} - {{ $level->description }}</summary>
+                <div class="collapse-content text-sm">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Curriculum</th>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Lec Hour</th>
+                                <th>Lab Hour</th>
+                                <th>Lec Unit</th>
+                                <th>Lab Unit</th>
+                                <th>Total Unit</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($groupedByLevel as $prospectus)
+                            <tr data-prospectus-id="{{ $prospectus->id }}">
+                                <td>{{ $prospectus->curriculum->curriculum }}</td>
+                                <td>{{ $prospectus->subject->code }}</td>
+                                <td>{{ $prospectus->subject->description }}</td>
+                                <td>{{ $prospectus->subject->lech }}</td>
+                                <td>{{ $prospectus->subject->labh }}</td>
+                                <td>{{ $prospectus->subject->lecu }}</td>
+                                <td>{{ $prospectus->subject->labu }}</td>
+                                <td>{{ $prospectus->subject->unit }}</td>
+                                <td>{{ $prospectus->status }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-ghost edit-btn" data-id="{{ $prospectus->id }}" onclick="openEditModal({{ $prospectus->id }})">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-ghost text-red-500 delete-btn" data-id="{{ $prospectus->id }}" onclick="deleteProspectus({{ $prospectus->id }}, this)">
+                                        <span class="loading loading-spinner loading-sm hidden"></span>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </details>
             @endforeach
         </div>
         @else
@@ -188,18 +163,7 @@
                     </label>
                     <select name="curriculum" id="editModalCurriculum" class="select select-bordered w-full">
                         @foreach ($curricula as $curriculum)
-                        <option value="{{ $curriculum->id }}">{{ $curriculum->curriculum }} - {{$curriculum->department->description}}</option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Academic Term</span>
-                    </label>
-                    <select name="academic_term" id="editModalAcademicTerm" class="select select-bordered w-full">
-                        @foreach ($academicTerms as $academicTerm)
-                        <option value="{{ $academicTerm->id }}" data-department-id="{{ $academicTerm->department_id }}">{{ $academicTerm->academic_year }} - {{ $academicTerm->description }}</option>
+                        <option value="{{ $curriculum->id }}" data-department-id="{{ $curriculum->department_id }}">{{ $curriculum->curriculum }} - {{$curriculum->department->description}}</option>
                         @endforeach
                     </select>
                 </div>
@@ -249,6 +213,7 @@
 <script>
     const csrfToken = '{{ csrf_token() }}';
     const levelsApiUrl = '{{ url("/registrar/api/levels-by-department") }}';
+    const curriculaApiUrl = '{{ url("/registrar/api/curricula-by-department") }}';
     const prospectusApiUrl = '{{ url("/registrar/api/prospectuses") }}';
     const createUrl = '{{ route("registrar.prospectus.create") }}';
     const updateUrl = '{{ url("/registrar/prospectuses") }}';
@@ -257,16 +222,66 @@
     // Store current prospectuses data for edit modal
     let currentProspectusesData = [];
 
+    // Load curricula by department for the search selects
+    async function loadCurriculaByDepartment(departmentId, selectElement, selectedCurriculumId = null) {
+        if (!departmentId) {
+            selectElement.innerHTML = '<option value="">--Select Curriculum--</option>';
+            selectElement.disabled = false;
+            return;
+        }
+
+        selectElement.innerHTML = '<option value="">Loading...</option>';
+        selectElement.disabled = true;
+
+        try {
+            const response = await fetch(`${curriculaApiUrl}/${departmentId}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const curricula = await response.json();
+
+            selectElement.innerHTML = '<option value="">--Select Curriculum--</option>';
+            curricula.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.id;
+                option.textContent = c.curriculum;
+                if (selectedCurriculumId && c.id == selectedCurriculumId) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error loading curricula:', error);
+            selectElement.innerHTML = '<option value="">--Error loading curricula--</option>';
+        } finally {
+            selectElement.disabled = false;
+        }
+    }
+
+    // Department change -> load curricula for search
+    document.getElementById('departmentSelect').addEventListener('change', function() {
+        const curriculumSelect = document.getElementById('curriculumSelect');
+        loadCurriculaByDepartment(this.value, curriculumSelect);
+    });
+
+    // On page load, if department is pre-selected (after search), load its curricula
+    document.addEventListener('DOMContentLoaded', function() {
+        const departmentSelect = document.getElementById('departmentSelect');
+        const curriculumSelect = document.getElementById('curriculumSelect');
+        if (departmentSelect.value) {
+            const oldCurriculum = '{{ $old_curriculum ?? '' }}';
+            loadCurriculaByDepartment(departmentSelect.value, curriculumSelect, oldCurriculum || null);
+        }
+    });
+
     // Async function to fetch and render prospectuses
     async function showProspectus() {
         const departmentSelect = document.getElementById('departmentSelect');
-        const academicYearSelect = document.getElementById('academicTermSelect');
+        const curriculumSelect = document.getElementById('curriculumSelect');
         const container = document.getElementById('prospectusContainer');
         
         const department = departmentSelect.value;
-        const academicYear = academicYearSelect.value;
+        const curriculum = curriculumSelect.value;
 
-        if (!department || !academicYear) {
+        if (!department || !curriculum) {
             container.innerHTML = '';
             return;
         }
@@ -280,7 +295,7 @@
         `;
 
         try {
-            const response = await fetch(`${prospectusApiUrl}?department=${department}&academic_year=${encodeURIComponent(academicYear)}`);
+            const response = await fetch(`${prospectusApiUrl}?department=${department}&curriculum=${curriculum}`);
             
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -308,7 +323,7 @@
         }
     }
 
-    // Render prospectuses HTML
+    // Render prospectuses HTML (grouped by level only)
     function renderProspectuses(data, count) {
         const container = document.getElementById('prospectusContainer');
 
@@ -323,69 +338,59 @@
 
         let html = '<div class="m-4">';
 
-        data.forEach(termGroup => {
-            const academicTerm = termGroup.academic_term;
+        data.forEach(levelGroup => {
+            const level = levelGroup.level;
             html += `
-                <div class="mb-8">
-                    <h3 class="text-lg font-bold mb-4">${academicTerm.department?.code || ''} - ${academicTerm.description}</h3>
+                <details class="collapse bg-base-100 border-base-300 border mb-3">
+                    <summary class="collapse-title font-semibold">${level.program?.code || ''} - ${level.description}</summary>
+                    <div class="collapse-content text-sm">
+                        <table class="table table-zebra">
+                            <thead>
+                                <tr>
+                                    <th>Curriculum</th>
+                                    <th>Code</th>
+                                    <th>Description</th>
+                                    <th>Lec Hour</th>
+                                    <th>Lab Hour</th>
+                                    <th>Lec Unit</th>
+                                    <th>Lab Unit</th>
+                                    <th>Total Unit</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
             `;
 
-            termGroup.levels.forEach(levelGroup => {
-                const level = levelGroup.level;
+            levelGroup.prospectuses.forEach(prospectus => {
                 html += `
-                    <details class="collapse bg-base-100 border-base-300 border mb-3">
-                        <summary class="collapse-title font-semibold">${level.program?.code || ''} - ${level.description}</summary>
-                        <div class="collapse-content text-sm">
-                            <table class="table table-zebra">
-                                <thead>
-                                    <tr>
-                                        <th>Curriculum</th>
-                                        <th>Code</th>
-                                        <th>Description</th>
-                                        <th>Lec Hour</th>
-                                        <th>Lab Hour</th>
-                                        <th>Lec Unit</th>
-                                        <th>Lab Unit</th>
-                                        <th>Total Unit</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
-
-                levelGroup.prospectuses.forEach(prospectus => {
-                    html += `
-                        <tr data-prospectus-id="${prospectus.id}">
-                            <td>${prospectus.curriculum?.curriculum || ''}</td>
-                            <td>${prospectus.subject?.code || ''}</td>
-                            <td>${prospectus.subject?.description || ''}</td>
-                            <td>${prospectus.subject?.lech || ''}</td>
-                            <td>${prospectus.subject?.labh || ''}</td>
-                            <td>${prospectus.subject?.lecu || ''}</td>
-                            <td>${prospectus.subject?.labu || ''}</td>
-                            <td>${prospectus.subject?.unit || ''}</td>
-                            <td>${prospectus.status}</td>
-                            <td>
-                                <button class="btn btn-sm btn-ghost edit-btn" onclick="openEditModal(${prospectus.id})">Edit</button>
-                                <button type="button" class="btn btn-sm btn-ghost text-red-500 delete-btn" onclick="deleteProspectus(${prospectus.id}, this)">
-                                    <span class="loading loading-spinner loading-sm hidden"></span>
-                                    Delete
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    </details>
+                    <tr data-prospectus-id="${prospectus.id}">
+                        <td>${prospectus.curriculum?.curriculum || ''}</td>
+                        <td>${prospectus.subject?.code || ''}</td>
+                        <td>${prospectus.subject?.description || ''}</td>
+                        <td>${prospectus.subject?.lech || ''}</td>
+                        <td>${prospectus.subject?.labh || ''}</td>
+                        <td>${prospectus.subject?.lecu || ''}</td>
+                        <td>${prospectus.subject?.labu || ''}</td>
+                        <td>${prospectus.subject?.unit || ''}</td>
+                        <td>${prospectus.status}</td>
+                        <td>
+                            <button class="btn btn-sm btn-ghost edit-btn" onclick="openEditModal(${prospectus.id})">Edit</button>
+                            <button type="button" class="btn btn-sm btn-ghost text-red-500 delete-btn" onclick="deleteProspectus(${prospectus.id}, this)">
+                                <span class="loading loading-spinner loading-sm hidden"></span>
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
                 `;
             });
 
-            html += '</div>';
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            `;
         });
 
         html += '</div>';
@@ -394,11 +399,9 @@
 
     // Find prospectus data by ID
     function findProspectusById(id) {
-        for (const termGroup of currentProspectusesData) {
-            for (const levelGroup of termGroup.levels) {
-                const found = levelGroup.prospectuses.find(p => p.id == id);
-                if (found) return found;
-            }
+        for (const levelGroup of currentProspectusesData) {
+            const found = levelGroup.prospectuses.find(p => p.id == id);
+            if (found) return found;
         }
         return null;
     }
@@ -416,13 +419,12 @@
 
         // Set form values
         document.getElementById('editModalCurriculum').value = prospectus.curriculum_id;
-        document.getElementById('editModalAcademicTerm').value = prospectus.academic_term_id;
         document.getElementById('editModalSubject').value = prospectus.subject_id;
         document.getElementById('editModalStatus').value = prospectus.status;
 
-        // Load levels for the selected academic term's department
-        const academicTermSelect = document.getElementById('editModalAcademicTerm');
-        const selectedOption = academicTermSelect.options[academicTermSelect.selectedIndex];
+        // Load levels for the selected curriculum's department
+        const curriculumSelect = document.getElementById('editModalCurriculum');
+        const selectedOption = curriculumSelect.options[curriculumSelect.selectedIndex];
         const departmentId = selectedOption.getAttribute('data-department-id');
         const levelSelect = document.getElementById('editModalLevelSelect');
         const updateBtn = document.getElementById('updateProspectusBtn');
@@ -436,7 +438,7 @@
     // Async function to fetch levels by department
     async function loadLevelsByDepartment(departmentId, levelSelectElement, saveBtn = null, selectedLevelId = null) {
         if (!departmentId) {
-            levelSelectElement.innerHTML = '<option value="">--Select Academic Term First--</option>';
+            levelSelectElement.innerHTML = '<option value="">--Select Curriculum First--</option>';
             levelSelectElement.disabled = false;
             if (saveBtn) saveBtn.disabled = true;
             return;
@@ -477,8 +479,8 @@
         }
     }
 
-    // Listen for academic term changes in the add modal
-    document.getElementById('addModalAcademicTerm').addEventListener('change', async function() {
+    // Listen for curriculum changes in the add modal -> load levels by department
+    document.getElementById('addModalCurriculum').addEventListener('change', async function() {
         const selectedOption = this.options[this.selectedIndex];
         const departmentId = selectedOption.getAttribute('data-department-id');
         const levelSelect = document.getElementById('addModalLevelSelect');
@@ -487,8 +489,8 @@
         await loadLevelsByDepartment(departmentId, levelSelect, saveBtn);
     });
 
-    // Listen for academic term changes in the edit modal
-    document.getElementById('editModalAcademicTerm').addEventListener('change', async function() {
+    // Listen for curriculum changes in the edit modal -> load levels by department
+    document.getElementById('editModalCurriculum').addEventListener('change', async function() {
         const selectedOption = this.options[this.selectedIndex];
         const departmentId = selectedOption.getAttribute('data-department-id');
         const levelSelect = document.getElementById('editModalLevelSelect');
@@ -511,7 +513,6 @@
 
         const formData = {
             curriculum: document.getElementById('addModalCurriculum').value,
-            academic_term: document.getElementById('addModalAcademicTerm').value,
             level: document.getElementById('addModalLevelSelect').value,
             subject: document.getElementById('addModalSubject').value,
             status: document.getElementById('addModalStatus').value,
@@ -533,10 +534,6 @@
             if (response.ok && data.success) {
                 showAlert('success', data.message);
                 form_modal.close();
-                // Reset form
-                // this.reset();
-                // document.getElementById('addModalLevelSelect').innerHTML = '<option value="">--Select Academic Term First--</option>';
-                // saveBtn.disabled = true;
                 // Refresh prospectuses without page reload
                 await showProspectus();
             } else {
@@ -566,7 +563,6 @@
 
         const formData = {
             curriculum: document.getElementById('editModalCurriculum').value,
-            academic_term: document.getElementById('editModalAcademicTerm').value,
             level: document.getElementById('editModalLevelSelect').value,
             subject: document.getElementById('editModalSubject').value,
             status: document.getElementById('editModalStatus').value,

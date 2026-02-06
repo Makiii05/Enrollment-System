@@ -75,6 +75,7 @@ Route::prefix('registrar')->name('registrar.')->group(function () {
         
         // API routes for dynamic loading
         Route::get('/api/levels-by-department/{departmentId}', [ProspectusController::class, 'getLevelsByDepartment'])->name('api.levels');
+        Route::get('/api/curricula-by-department/{departmentId}', [ProspectusController::class, 'getCurriculaByDepartment'])->name('api.curricula');
         Route::get('/api/prospectuses', [ProspectusController::class, 'getProspectusesApi'])->name('api.prospectuses');
     });
 });
