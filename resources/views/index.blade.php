@@ -64,6 +64,16 @@
                     <p class="mt-2 text-sm text-slate-400 text-center">Application Form</p>
                 </a>
     
+                <a href="{{ route('department.login') }}" class="group relative flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-sm border border-slate-100 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:border-purple-200">
+                    <div class="mb-4 p-4 bg-purple-50 rounded-2xl text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors duration-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 0A.75.75 0 0 1 7.5 6h9a.75.75 0 0 1 .75.75m-.75 0V4.5" />
+                        </svg>
+                    </div>
+                    <span class="text-xl font-bold text-slate-800 tracking-wide">DEPARTMENT</span>
+                    <p class="mt-2 text-sm text-slate-400 text-center">Department Portal</p>
+                </a>
+    
             </div>
     
             <p class="mt-16 text-center text-slate-400 text-sm">

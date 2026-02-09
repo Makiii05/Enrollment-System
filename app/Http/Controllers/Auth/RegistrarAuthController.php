@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class AccountingController extends Controller
+class RegistrarAuthController extends Controller
 {
     public function showLogin(){
-        return view('accounting.login');
+        return view('registrar.login');
     }
 
     public function login(Request $request){
@@ -23,20 +24,21 @@ class AccountingController extends Controller
         if(Auth::attempt($validated)){
             $request->session()->regenerate();
             $user = auth()->user();
-            if ($user && isset($user->type) && $user->type === 'accounting') {
-                return redirect()->route('accounting.fee');
+            if ($user && isset($user->type) && $user->type === 'registrar') {
+                return redirect()->route('registrar.dashboard');
             } else {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 throw ValidationException::withMessages([
-                    'email' => 'You are not authorized as an accounting user.',
+                    'email' => 'You are not authorized as a registrar.',
                 ]);
             }
         }
         throw ValidationException::withMessages([
             'email' => 'These credentials do not match our records.',
         ]);
+
     }
 
     public function logout(Request $request){
@@ -45,10 +47,11 @@ class AccountingController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('accounting.login');
+        return redirect()->route('registrar.login');
     }
 
     public function showDashboard(){
-        return view('accounting.dashboard');
+        return view('registrar.dashboard');
     }
+
 }

@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth; // ✅ You need this
-use Illuminate\Support\Facades\Hash; // ✅ Also this for password hashing
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class AdmissionController extends Controller
+class AccountingAuthController extends Controller
 {
     public function showLogin(){
-        return view('admission.login');
+        return view('accounting.login');
     }
 
     public function login(Request $request){
@@ -23,21 +24,20 @@ class AdmissionController extends Controller
         if(Auth::attempt($validated)){
             $request->session()->regenerate();
             $user = auth()->user();
-            if ($user && isset($user->type) && $user->type === 'admission') {
-                return redirect()->route('admission.dashboard');
+            if ($user && isset($user->type) && $user->type === 'accounting') {
+                return redirect()->route('accounting.fee');
             } else {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 throw ValidationException::withMessages([
-                    'email' => 'You are not authorized as an admission user.',
+                    'email' => 'You are not authorized as an accounting user.',
                 ]);
             }
         }
         throw ValidationException::withMessages([
             'email' => 'These credentials do not match our records.',
         ]);
-
     }
 
     public function logout(Request $request){
@@ -46,7 +46,10 @@ class AdmissionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admission.login');
+        return redirect()->route('accounting.login');
     }
 
+    public function showDashboard(){
+        return view('accounting.dashboard');
+    }
 }

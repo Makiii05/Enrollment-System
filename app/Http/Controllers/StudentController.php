@@ -24,7 +24,7 @@ class StudentController extends Controller
         return view('admission.student', compact('students'));
     }
 
-    public function editStudent($id)
+    public function editStudent(Request $request, $id)
     {
         $student = Student::with(['department', 'program', 'level', 'contact', 'guardian', 'academicHistory'])
             ->findOrFail($id);
@@ -33,7 +33,11 @@ class StudentController extends Controller
         $programs = Program::all();
         $levels = Level::all();
         
-        return view('admission.student-edit', compact('student', 'departments', 'programs', 'levels'));
+        // Detect if coming from department context
+        $prefix = $request->route()->getPrefix();
+        $view = str_contains($prefix, 'department') ? 'department.student-edit' : 'admission.student-edit';
+        
+        return view($view, compact('student', 'departments', 'programs', 'levels'));
     }
 
     public function updateStudent(Request $request, $id)
@@ -124,7 +128,11 @@ class StudentController extends Controller
             );
         }
         
-        return redirect()->route('admission.student')->with('success', 'Student updated successfully.');
+        // Detect if coming from department context
+        $prefix = $request->route()->getPrefix();
+        $redirectRoute = str_contains($prefix, 'department') ? 'department.student' : 'admission.student';
+        
+        return redirect()->route($redirectRoute)->with('success', 'Student updated successfully.');
     }
 
     /**
@@ -253,5 +261,21 @@ class StudentController extends Controller
                 'message' => "Failed to create student for {$applicant->application_no}: " . $e->getMessage()
             ];
         }
+    }
+
+
+    // department students view
+    public function showDepartmentStudents(Request $request)
+    {
+        $user = $request->user();
+        $type = $user->type;
+        $departmentId = Department::where('code', $type)->value('id');
+
+        $students = Student::with(['program', 'level', 'contact', 'guardian', 'academicHistory'])
+            ->where('department_id', $departmentId)
+            ->orderBy('student_number')
+            ->paginate(15);
+        
+        return view('department.students', compact('students'));
     }
 }

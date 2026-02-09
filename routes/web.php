@@ -7,17 +7,18 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProspectusController;
-use App\Http\Controllers\RegistrarController;
+use App\Http\Controllers\Auth\RegistrarAuthController;
 use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\FeeController;
-use App\Http\Controllers\AccountingController;
+use App\Http\Controllers\Auth\AccountingAuthController;
 use App\Http\Controllers\ApplicantController;
-use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\Auth\AdmissionAuthController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\AdmissionProcessController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\Auth\AdminAuthController;
+use App\Http\Controllers\Auth\DepartmentAuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PdfController;
 
@@ -29,13 +30,13 @@ Route::prefix('application')->name('applicant.')->group(function () {
 });
 
 Route::prefix('registrar')->name('registrar.')->group(function () {
-    Route::get('/', [RegistrarController::class, 'showLogin'])->name('login');
-    Route::post('/login', [RegistrarController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [RegistrarController::class, 'logout'])->name('logout');
+    Route::get('/', [RegistrarAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [RegistrarAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [RegistrarAuthController::class, 'logout'])->name('logout');
 
     // Protected routes - require authentication and registrar type
     Route::middleware(['auth', 'can:access-registrar'])->group(function () {
-        Route::get('/dashboard', [RegistrarController::class, 'showDashboard'])->name('dashboard');
+        Route::get('/dashboard', [RegistrarAuthController::class, 'showDashboard'])->name('dashboard');
 
         Route::get('/departments', [DepartmentController::class, 'showDepartment'])->name('department');
         Route::post('/departments', [DepartmentController::class, 'createDepartment'])->name('department.create');
@@ -81,9 +82,9 @@ Route::prefix('registrar')->name('registrar.')->group(function () {
 });
 
 Route::prefix('accounting')->name('accounting.')->group(function () {
-    Route::get('/', [AccountingController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AccountingController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AccountingController::class, 'logout'])->name('logout');
+    Route::get('/', [AccountingAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AccountingAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AccountingAuthController::class, 'logout'])->name('logout');
 
     // Protected routes - require authentication and accounting type
     Route::middleware(['auth', 'can:access-accounting'])->group(function () {
@@ -96,9 +97,9 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
 });
 
 Route::prefix('admission')->name('admission.')->group(function () {
-    Route::get('/', [AdmissionController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdmissionController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AdmissionController::class, 'logout'])->name('logout');
+    Route::get('/', [AdmissionAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdmissionAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdmissionAuthController::class, 'logout'])->name('logout');
 
     // Protected routes - require authentication and admission type
     Route::middleware(['auth', 'can:access-admission'])->group(function () {
@@ -120,7 +121,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::post('/exam/{id}/update', [AdmissionProcessController::class, 'updateExam'])->name('exam.update');
         Route::post('/evaluation/{id}/update', [AdmissionProcessController::class, 'updateEvaluation'])->name('evaluation.update');
         
-        Route::post('/applicant/mark-interview', [ApplicantController::class, 'markForInterview'])->name('applicant.mark-interview');
+        Route::post('/applicant/mark-interview', [ApplicantController::class, 'createApplicantProcess'])->name('applicant.mark-interview');
         Route::post('/applicant/delete', [ApplicantController::class, 'deleteApplicants'])->name('applicant.delete');
         Route::post('/interview/process-action', [AdmissionProcessController::class, 'processInterviewAction'])->name('interview.process-action');
         Route::post('/exam/process-action', [AdmissionProcessController::class, 'processExamAction'])->name('exam.process-action');
@@ -140,18 +141,33 @@ Route::prefix('admission')->name('admission.')->group(function () {
     });
 });
 
+Route::prefix('department')->name('department.')->group(function () {
+    Route::get('/', [DepartmentAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [DepartmentAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [DepartmentAuthController::class, 'logout'])->name('logout');
+
+    // Protected routes - require authentication and department type
+    Route::middleware(['auth', 'can:access-department'])->group(function () {
+        Route::get('/dashboard', [DepartmentAuthController::class, 'showDashboard'])->name('dashboard');
+        
+        Route::get('/student', [StudentController::class, 'showDepartmentStudents'])->name('student');
+        Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
+        Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
+    });
+});
+
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AdminController::class, 'login'])->name('login.submit');
-    Route::post('/logout', [AdminController::class, 'logout'])->name('logout');
+    Route::get('/', [AdminAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
 
     // Protected routes - require authentication and admin type
     Route::middleware(['auth', 'can:access-admin'])->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'showDashboard'])->name('dashboard');
+        Route::get('/dashboard', [AdminAuthController::class, 'showDashboard'])->name('dashboard');
 
-        Route::get('/users', [AdminController::class, 'showUsers'])->name('users');
-        Route::post('/users', [AdminController::class, 'createUser'])->name('users.create');
-        Route::post('/users/{id}/update', [AdminController::class, 'updateUser'])->name('users.update');
-        Route::post('/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('users.delete');
+        Route::get('/users', [AdminAuthController::class, 'showUsers'])->name('users');
+        Route::post('/users', [AdminAuthController::class, 'createUser'])->name('users.create');
+        Route::post('/users/{id}/update', [AdminAuthController::class, 'updateUser'])->name('users.update');
+        Route::post('/users/{id}/delete', [AdminAuthController::class, 'deleteUser'])->name('users.delete');
     });
 });

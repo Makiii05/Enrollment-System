@@ -114,10 +114,26 @@ class ApplicantController extends Controller
         ]);
     }
 
-    public function markForInterview(Request $request){
+    /**
+     * Ensure an admission record exists for the given applicant.
+     * Creates one if it doesn't exist. Returns the Admission instance.
+     */
+    public static function ensureAdmissionExists($applicantId)
+    {
+        return Admission::firstOrCreate(
+            ['applicant_id' => $applicantId],
+            [
+                'interview_result' => 'pending',
+                'exam_result' => 'pending',
+                'decision' => 'pending',
+            ]
+        );
+    }
+
+    public function createApplicantProcess(Request $request){
         $validated = $request->validate([
             'action' => 'required|in:markForInterview,markForExamination,markForEvaluation',
-            'schedule_id' => 'required_unless:action,markForEvaluation|nullable|exists:schedules,id',
+            'schedule_id' => 'required|exists:schedules,id',
             'applicant_ids' => 'required|array|min:1',
             'applicant_ids.*' => 'exists:applicants,id',
         ]);
@@ -139,20 +155,22 @@ class ApplicantController extends Controller
 
         $count = count($pendingApplicants);
         $skipped = count($applicantIds) - $count;
+
+        // Create admission records for all pending applicants first
+        foreach($pendingApplicants as $applicantId){
+            self::ensureAdmissionExists($applicantId);
+        }
         
         if ($action === 'markForInterview') {
             // Update only pending applicants to 'interview' status
             Applicant::whereIn('id', $pendingApplicants)
                 ->update(['status' => 'interview']);
 
-            // Create admission records only for pending applicants
-            foreach($pendingApplicants as $applicantId){
-                Admission::create([
-                    'applicant_id' => $applicantId,
-                    'interview_schedule_id' => $scheduleId,
-                    'interview_result' => 'pending',
-                ]);
-            }
+            // Update admission records with interview schedule
+            Admission::whereIn('applicant_id', $pendingApplicants)->update([
+                'interview_schedule_id' => $scheduleId,
+                'interview_result' => 'pending',
+            ]);
             $message = "{$count} applicant(s) marked for interview successfully.";
             
         } elseif ($action === 'markForExamination') {
@@ -160,14 +178,11 @@ class ApplicantController extends Controller
             Applicant::whereIn('id', $pendingApplicants)
                 ->update(['status' => 'exam']);
 
-            // Create admission records only for pending applicants
-            foreach($pendingApplicants as $applicantId){
-                Admission::create([
-                    'applicant_id' => $applicantId,
-                    'exam_schedule_id' => $scheduleId,
-                    'exam_result' => 'pending',
-                ]);
-            }
+            // Update admission records with exam schedule
+            Admission::whereIn('applicant_id', $pendingApplicants)->update([
+                'exam_schedule_id' => $scheduleId,
+                'exam_result' => 'pending',
+            ]);
             $message = "{$count} applicant(s) marked for examination successfully.";
             
         } elseif ($action === 'markForEvaluation') {
@@ -175,13 +190,11 @@ class ApplicantController extends Controller
             Applicant::whereIn('id', $pendingApplicants)
                 ->update(['status' => 'evaluation']);
 
-            // Create admission records only for pending applicants
-            foreach($pendingApplicants as $applicantId){
-                Admission::create([
-                    'applicant_id' => $applicantId,
-                    'final_score' => 0, // No exam/interview scores
-                ]);
-            }
+            // Update admission records with final_score and evaluation schedule
+            Admission::whereIn('applicant_id', $pendingApplicants)->update([
+                'final_score' => 0,
+                'evaluation_schedule_id' => $scheduleId,
+            ]);
             $message = "{$count} applicant(s) marked for evaluation successfully.";
         }
 

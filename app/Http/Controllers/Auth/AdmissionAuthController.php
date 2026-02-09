@@ -1,17 +1,18 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth; // ✅ You need this
-use Illuminate\Support\Facades\Hash; // ✅ Also this for password hashing
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class RegistrarController extends Controller
+class AdmissionAuthController extends Controller
 {
     public function showLogin(){
-        return view('registrar.login');
+        return view('admission.login');
     }
 
     public function login(Request $request){
@@ -23,14 +24,14 @@ class RegistrarController extends Controller
         if(Auth::attempt($validated)){
             $request->session()->regenerate();
             $user = auth()->user();
-            if ($user && isset($user->type) && $user->type === 'registrar') {
-                return redirect()->route('registrar.dashboard');
+            if ($user && isset($user->type) && $user->type === 'admission') {
+                return redirect()->route('admission.dashboard');
             } else {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
                 throw ValidationException::withMessages([
-                    'email' => 'You are not authorized as a registrar.',
+                    'email' => 'You are not authorized as an admission user.',
                 ]);
             }
         }
@@ -46,11 +47,7 @@ class RegistrarController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('registrar.login');
-    }
-
-    public function showDashboard(){
-        return view('registrar.dashboard');
+        return redirect()->route('admission.login');
     }
 
 }

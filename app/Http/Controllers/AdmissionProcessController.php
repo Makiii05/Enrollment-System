@@ -7,6 +7,7 @@ use App\Models\Admission;
 use App\Models\Applicant;
 use App\Models\Level;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\ApplicantController;
 
 class AdmissionProcessController extends Controller
 {
@@ -90,6 +91,14 @@ class AdmissionProcessController extends Controller
         $admissionIds = $validated['applicant_ids'];
         $scheduleId = $validated['schedule_id'] ?? null;
         $count = count($admissionIds);
+
+        // Ensure admission records exist for all selected applicants
+        foreach ($admissionIds as $admissionId) {
+            $admission = Admission::find($admissionId);
+            if ($admission) {
+                ApplicantController::ensureAdmissionExists($admission->applicant_id);
+            }
+        }
 
         if ($action === 'reschedule') {
             // Reschedule interview - just update the interview schedule
@@ -175,6 +184,14 @@ class AdmissionProcessController extends Controller
         $scheduleId = $validated['schedule_id'] ?? null;
         $count = count($admissionIds);
 
+        // Ensure admission records exist for all selected applicants
+        foreach ($admissionIds as $admissionId) {
+            $admission = Admission::find($admissionId);
+            if ($admission) {
+                ApplicantController::ensureAdmissionExists($admission->applicant_id);
+            }
+        }
+
         if ($action === 'reschedule') {
             // Reschedule exam - just update the exam schedule
             Admission::whereIn('id', $admissionIds)->update([
@@ -258,6 +275,14 @@ class AdmissionProcessController extends Controller
         $admissionIds = $validated['applicant_ids'];
         $scheduleId = $validated['schedule_id'] ?? null;
         $count = count($admissionIds);
+
+        // Ensure admission records exist for all selected applicants
+        foreach ($admissionIds as $admissionId) {
+            $admission = Admission::find($admissionId);
+            if ($admission) {
+                ApplicantController::ensureAdmissionExists($admission->applicant_id);
+            }
+        }
 
         if ($action === 'reschedule') {
             // Reschedule evaluation - just update the evaluation schedule

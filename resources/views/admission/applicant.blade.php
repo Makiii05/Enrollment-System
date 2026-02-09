@@ -127,8 +127,8 @@
                 // Check if any non-admitted applicants are selected for delete button
                 const anyDeletableChecked = Array.from(applicantCheckboxes).some(cb => cb.checked && cb.dataset.status !== 'admitted');
                 
-                // Proceed Button - requires action, schedule (unless evaluation), and selected applicants
-                const canProceed = actionSelected && anyChecked && (isEvaluation || scheduleSelected);
+                // Proceed Button - requires action, schedule, and selected applicants
+                const canProceed = actionSelected && anyChecked && scheduleSelected;
                 if (canProceed) {
                     proceedBtn.disabled = false;
                     proceedBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
@@ -161,13 +161,7 @@
                     return;
                 }
 
-                // For evaluation, no schedule needed
-                if (processType === 'evaluation') {
-                    scheduleSelect.disabled = true;
-                    scheduleSelect.innerHTML = '<option value="">No schedule required</option>';
-                    updateButtonState();
-                    return;
-                }
+
 
                 scheduleLoading.classList.remove('opacity-0', 'pointer-events-none');
                 scheduleSelect.disabled = true;
