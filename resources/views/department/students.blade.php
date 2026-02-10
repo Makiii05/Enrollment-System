@@ -52,7 +52,7 @@
                                 href="" 
                                 class="btn btn-sm btn-ghost text-green-600 font-semibold"
                             >
-                                Schedule
+                                Assessment
                             </a>
                             <a 
                                 href="{{ route('department.student.edit', $student->id) }}" 

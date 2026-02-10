@@ -121,7 +121,8 @@ class ProspectusController extends Controller
 
     public function getLevelsByDepartment($departmentId)
     {
-        $levels = Level::whereHas('program', function ($query) use ($departmentId) {
+        $levels = Level::with('program')
+            ->whereHas('program', function ($query) use ($departmentId) {
                 $query->where('department_id', $departmentId);
             })
             ->orderBy('created_at', 'asc')

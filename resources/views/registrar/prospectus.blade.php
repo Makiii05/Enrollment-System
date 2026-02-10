@@ -464,7 +464,7 @@
             levels.forEach(level => {
                 const option = document.createElement('option');
                 option.value = level.id;
-                option.textContent = level.description;
+                option.textContent = (level.program ? level.program.code : level.program_id) + " - " + level.description;
                 if (selectedLevelId && level.id == selectedLevelId) {
                     option.selected = true;
                 }
