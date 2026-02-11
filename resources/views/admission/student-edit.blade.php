@@ -33,6 +33,8 @@
                     <label class="label"><span class="label-text">Status *</span></label>
                     <select name="status" class="select select-bordered" required>
                         <option value="enrolled" {{ old('status', $student->status) == 'enrolled' ? 'selected' : '' }}>Enrolled</option>
+                        <option value="regular" {{ old('status', $student->status) == 'regular' ? 'selected' : '' }}>Regular</option>
+                        <option value="irregular" {{ old('status', $student->status) == 'irregular' ? 'selected' : '' }}>Irregular</option>
                         <option value="withdrawn" {{ old('status', $student->status) == 'withdrawn' ? 'selected' : '' }}>Withdrawn</option>
                         <option value="dropped" {{ old('status', $student->status) == 'dropped' ? 'selected' : '' }}>Dropped</option>
                         <option value="graduated" {{ old('status', $student->status) == 'graduated' ? 'selected' : '' }}>Graduated</option>

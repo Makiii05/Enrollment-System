@@ -1,10 +1,12 @@
 <x-department_sidebar>
 
     @include('partials.notifications')
-    @include('partials.dept-student-full-modal')
 
     <div class="flex items-center gap-4 mb-4">
-        <h2 class="font-bold text-4xl flex-1">Students</h2>
+        <h2 class="font-bold text-4xl">Enlistment</h2>
+        @if(isset($academicTerm))
+        <h2 class="flex-1 text-2xl"><span>(Academic Term: <strong>{{ $academicTerm->description }}</strong>)</span></h2>
+        @endif
         <div class="flex gap-2">
             <input type="text" id="searchInput" placeholder="Search students..." class="input input-bordered w-64" />
             <select id="statusFilter" class="select select-bordered">
@@ -35,7 +37,7 @@
             </thead>
             <tbody>
                 @forelse ($students as $student)
-                <tr>
+                <tr class="hover:bg-base-200 cursor-pointer" onclick="window.location='#'">
                     <td>{{ $student->student_number }}</td>
                     <td>{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name }}</td>
                     <td>{{ $student->program->code ?? '-' }}</td>
@@ -46,16 +48,10 @@
                             <button 
                                 type="button" 
                                 class="btn btn-sm btn-ghost text-primary font-semibold"
-                                onclick="openDeptStudentFullModal({{ json_encode($student->load(['department', 'program', 'level'])) }}, {{ json_encode($student->contact) }}, {{ json_encode($student->guardian) }}, {{ json_encode($student->academicHistory) }})"
+                                onclick="event.stopPropagation();"
                             >
-                                Details
+                                View Subject
                             </button>
-                            <a 
-                                href="{{ route('department.student.edit', $student->id) }}" 
-                                class="btn btn-sm btn-ghost text-amber-600 font-semibold"
-                            >
-                                Edit
-                            </a>
                         </div>
                     </td>
                 </tr>
@@ -100,4 +96,4 @@
         });
     </script>
 
-</x-department_sidebar>        
+</x-department_sidebar>

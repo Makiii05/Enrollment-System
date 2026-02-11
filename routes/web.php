@@ -155,6 +155,8 @@ Route::prefix('department')->name('department.')->group(function () {
         Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
         Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
 
+        Route::get('/enlistment', [StudentController::class, 'showEnlistment'])->name('enlistment');
+
         Route::get('/subject-offering', [SubjectOfferingController::class, 'showSubjectOffering'])->name('subject_offering');
         Route::post('/subject-offering/search', [SubjectOfferingController::class, 'searchOffering'])->name('subject_offering.search');
         Route::get('/api/curricula-by-department/{departmentId}', [SubjectOfferingController::class, 'getCurriculaByDepartment'])->name('api.curricula');

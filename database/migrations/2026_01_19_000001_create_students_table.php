@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string("place_of_birth");
             $table->enum("civil_status", ['Single', 'Married', 'Widow/Widower'])->default('Single');
             $table->foreignId('application_id')->constrained('applicants')->onDelete('cascade');
-            $table->enum("status", ['enrolled', 'withdrawn', 'dropped', 'graduated'])->default('enrolled');
+            $table->enum("status", ['enrolled', 'withdrawn', 'dropped', 'graduated', 'regular', 'irregular'])->default('enrolled');
         });
     }
 

@@ -4,15 +4,21 @@
     @include('partials.dept-student-full-modal')
 
     <div class="flex items-center gap-4 mb-4">
-        <h2 class="font-bold text-4xl flex-1">Subject Offering</h2>
+        <h2 class="font-bold text-4xl">Subject Offering</h2>
+        @if(isset($academicTerm))
+            <h2 class="flex-1 text-2xl"><span>(Academic Term: <strong>{{ $academicTerm->description }}</strong>)</span></h2>
+        @endif
     </div>
     
     <div class="flex gap-5">
-        <!--TABLE-->
-        <div class="overflow-x-auto bg-white shadow grow">
+        <!--PROSPECTUS TABLE-->
+        <div class="overflow-x-auto bg-white shadow w-1/2">
             <div class="p-4">
                 <form action="{{ route('department.subject_offering.search') }}" method="POST" class="grow flex gap-2 items-center">
                     @csrf
+                    @if(isset($academicTerm))
+                    <input type="hidden" name="academic_term_id" value="{{ $academicTerm->id }}" />
+                    @endif
                     <select name="department" id="departmentSelect" class="select select-bordered" required>
                         <option value="">--Select Department--</option>
                         @foreach ($departments as $department)
@@ -42,6 +48,7 @@
                                         <tr>
                                             <th>Code</th>
                                             <th>Description</th>
+                                            <th>Unit</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -49,11 +56,12 @@
                                         <tr data-prospectus-id="{{ $prospectus->id }}">
                                             <td>{{ $prospectus->subject->code }}</td>
                                             <td>{{ $prospectus->subject->description }}</td>
+                                            <td>{{ $prospectus->subject->unit }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
-                            </div>
+                            </div>  
                         </details>
                         @endforeach
                     </div>
@@ -69,8 +77,43 @@
             </div>
         </div>
     
-        <div class="overflow-x-auto bg-white shadow">
-            
+        <!--SUBJECT OFFERING TABLE-->
+        <div class="overflow-x-auto bg-white shadow w-1/2">
+            <div class="p-4">
+                <h3 class="font-semibold text-lg">Subject Offerings</h3>
+            </div>
+            <table class="table table-zebra">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Code</th>
+                        <th>Description</th>
+                        <th>Units</th>
+                        <th>Final Grade</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if(isset($subjectOfferings) && $subjectOfferings->count() > 0)
+                        @foreach ($subjectOfferings as $offering)
+                        <tr>
+                            <td>{{ $offering->id }}</td>
+                            <td>{{ $offering->code }}</td>
+                            <td>{{ $offering->description }}</td>
+                            <td>{{ $offering->subject->unit ?? '-' }}</td>
+                            <td>-</td>
+                            <td>
+                                <button class="btn btn-sm btn-ghost text-primary font-semibold">View</button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="6" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
         </div>
     </div>
 

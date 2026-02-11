@@ -9,6 +9,7 @@ use App\Models\Program;
 use App\Models\Level;
 use App\Models\Applicant;
 use App\Models\Admission;
+use App\Models\AcademicTerm;
 use App\Models\StudentContact;
 use App\Models\StudentGuardian;
 use App\Models\StudentAcademicHistory;
@@ -60,7 +61,7 @@ class StudentController extends Controller
             'birthdate' => 'nullable|date',
             'place_of_birth' => 'nullable|string|max:255',
             'civil_status' => 'nullable|string|max:50',
-            'status' => 'required|string|in:enrolled,withdrawn,dropped,graduated',
+            'status' => 'required|string|in:enrolled,regular,irregular,withdrawn,dropped,graduated',
         ]);
         
         $student->update($validatedStudent);
@@ -277,5 +278,23 @@ class StudentController extends Controller
             ->paginate(15);
         
         return view('department.students', compact('students'));
+    }
+
+    // department enlistment view
+    public function showEnlistment(Request $request)
+    {
+        $user = $request->user();
+        $type = $user->type;
+        $departmentId = Department::where('code', $type)->value('id');
+
+        $academicTermId = $request->query('academic_term_id');
+        $academicTerm = $academicTermId ? AcademicTerm::find($academicTermId) : null;
+
+        $students = Student::with(['program', 'level'])
+            ->where('department_id', $departmentId)
+            ->orderBy('student_number')
+            ->paginate(15);
+        
+        return view('department.enlistment', compact('students', 'academicTerm'));
     }
 }
