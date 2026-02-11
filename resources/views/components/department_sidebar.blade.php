@@ -18,7 +18,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke-linejoin="round" stroke-linecap="round" stroke-width="2" fill="none" stroke="currentColor" class="my-1.5 inline-block size-4"><path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"></path><path d="M9 4v16"></path><path d="M14 10l2 2l-2 2"></path></svg>
           </label>
           <div class="px-4">{{ env('APP_NAME') }}</div>
-          <div class="ms-auto mx-3">{{ auth()->user()->type }}</div>
+          <div class="ms-auto mx-3">{{ auth()->user()->department->code ?? auth()->user()->type }}</div>
         </nav>
         <!-- Page content here -->
         <main class="p-4">
@@ -97,11 +97,9 @@
                     <option value="">-- Select Academic Term --</option>
                     @php
                         $academicTerms = \App\Models\AcademicTerm::where('status', 'active')
-                        ->whereHas('department', function ($query) {
-                            $query->where('code', auth()->user()->type);
-                        })
-                        ->orderBy('created_at')
-                        ->get();
+                            ->where('department_id', auth()->user()->department_id)
+                            ->orderBy('created_at')
+                            ->get();
                     @endphp
                     @foreach ($academicTerms as $term)
                         <option value="{{ $term->id }}">{{ $term->description }}</option>

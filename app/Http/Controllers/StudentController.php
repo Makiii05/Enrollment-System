@@ -269,8 +269,7 @@ class StudentController extends Controller
     public function showDepartmentStudents(Request $request)
     {
         $user = $request->user();
-        $type = $user->type;
-        $departmentId = Department::where('code', $type)->value('id');
+        $departmentId = $user->department_id;
 
         $students = Student::with(['program', 'level', 'contact', 'guardian', 'academicHistory'])
             ->where('department_id', $departmentId)
@@ -284,8 +283,7 @@ class StudentController extends Controller
     public function showEnlistment(Request $request)
     {
         $user = $request->user();
-        $type = $user->type;
-        $departmentId = Department::where('code', $type)->value('id');
+        $departmentId = $user->department_id;
 
         $academicTermId = $request->query('academic_term_id');
         $academicTerm = $academicTermId ? AcademicTerm::find($academicTermId) : null;

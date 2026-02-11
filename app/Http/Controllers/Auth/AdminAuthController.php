@@ -60,7 +60,7 @@ class AdminAuthController extends Controller
 
     public function showUsers()
     {
-        $users = User::orderBy('created_at', 'desc')->paginate(20);
+        $users = User::with('department')->orderBy('created_at', 'desc')->paginate(20);
         $departments = Department::all();
 
         return view('admin.users', [
@@ -74,7 +74,8 @@ class AdminAuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'type' => 'required|in:admin,registrar,admission,accounting,' . implode(',', Department::pluck('code')->toArray()),
+            'type' => 'required|string',
+            'department_id' => 'nullable|exists:departments,id',
             'role' => 'required|in:head,proctor',
             'password' => 'required|string|min:8|confirmed',
         ]);
@@ -83,6 +84,7 @@ class AdminAuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'type' => $validated['type'],
+            'department_id' => $validated['department_id'] ?? null,
             'role' => $validated['role'],
             'password' => Hash::make($validated['password']),
         ]);
@@ -98,7 +100,8 @@ class AdminAuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
-            'type' => 'required|in:admin,registrar,admission,accounting',
+            'type' => 'required|string',
+            'department_id' => 'nullable|exists:departments,id',
             'role' => 'required|in:head,proctor',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
@@ -107,6 +110,7 @@ class AdminAuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'type' => $validated['type'],
+            'department_id' => $validated['department_id'] ?? null,
             'role' => $validated['role'],
         ];
 

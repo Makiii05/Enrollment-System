@@ -11,69 +11,110 @@
     </div>
     
     <div class="flex gap-5">
-        <!--PROSPECTUS TABLE-->
+        <!--LEFT PANEL: PROSPECTUS + SUBJECT SEARCH-->
         <div class="overflow-x-auto bg-white shadow w-1/2">
-            <div class="p-4">
-                <form action="{{ route('department.subject_offering.search') }}" method="POST" class="grow flex gap-2 items-center">
-                    @csrf
-                    @if(isset($academicTerm))
-                    <input type="hidden" name="academic_term_id" value="{{ $academicTerm->id }}" />
-                    @endif
-                    <select name="department" id="departmentSelect" class="select select-bordered" required>
-                        <option value="">--Select Department--</option>
-                        @foreach ($departments as $department)
-                        <option value="{{ $department->id }}" @if(isset($old_department) && $old_department == $department->id) selected @endif>{{ $department->description }}</option>
-                        @endforeach
-                    </select>
-                    <select name="curriculum" id="curriculumSelect" class="select select-bordered" required>
-                        <option value="">--Select Curriculum--</option>
-                    </select>
-                    <button type="submit" class="btn bg-white">Search</button>
-                </form>
+            <!-- Tabs -->
+            <div class="flex border-b">
+                <button type="button" id="tabProspectus" onclick="switchTab('prospectus')"
+                    class="flex-1 py-3 px-4 text-sm font-semibold text-center bg-black text-white transition-colors duration-200">
+                    Search by Prospectus
+                </button>
+                <button type="button" id="tabSubject" onclick="switchTab('subject')"
+                    class="flex-1 py-3 px-4 text-sm font-semibold text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200">
+                    Search by Subject
+                </button>
             </div>
-            <div>
-                @if(isset($prospectuses))
-                    <div id="prospectusContainer">
-                    @if ($prospectuses->count() > 0)
-                    <div class="m-4">
-                        @foreach ($prospectuses->groupBy('level_id') as $levelId => $groupedByLevel)
-                        @php
-                            $level = $groupedByLevel->first()->level;
-                        @endphp
-                        <details class="collapse bg-base-100 border-base-300 border mb-3">
-                            <summary class="collapse-title font-semibold">{{ $level->program->code}} - {{ $level->description }}</summary>
-                            <div class="collapse-content text-sm">
-                                <table class="table table-zebra">
-                                    <thead>
-                                        <tr>
-                                            <th>Code</th>
-                                            <th>Description</th>
-                                            <th>Unit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($groupedByLevel as $prospectus)
-                                        <tr data-prospectus-id="{{ $prospectus->id }}">
-                                            <td>{{ $prospectus->subject->code }}</td>
-                                            <td>{{ $prospectus->subject->description }}</td>
-                                            <td>{{ $prospectus->subject->unit }}</td>
-                                        </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>  
-                        </details>
-                        @endforeach
-                    </div>
+
+            <!-- Prospectus Search Tab -->
+            <div id="panelProspectus">
+                <div class="p-4">
+                    <form action="{{ route('department.subject_offering.search') }}" method="POST" class="grow flex gap-2 items-center flex-wrap">
+                        @csrf
+                        @if(isset($academicTerm))
+                        <input type="hidden" name="academic_term_id" value="{{ $academicTerm->id }}" />
+                        @endif
+                        <select name="department" id="departmentSelect" class="select select-bordered" required>
+                            <option value="">--Select Department--</option>
+                            @foreach ($departments as $department)
+                            <option value="{{ $department->id }}" @if(isset($old_department) && $old_department == $department->id) selected @endif>{{ $department->description }}</option>
+                            @endforeach
+                        </select>
+                        <select name="curriculum" id="curriculumSelect" class="select select-bordered" required>
+                            <option value="">--Select Curriculum--</option>
+                        </select>
+                        <button type="submit" class="btn bg-white">Search</button>
+                    </form>
+                </div>
+                <div>
+                    @if(isset($prospectuses))
+                        <div id="prospectusContainer">
+                        @if ($prospectuses->count() > 0)
+                        <div class="m-4">
+                            @foreach ($prospectuses->groupBy('level_id') as $levelId => $groupedByLevel)
+                            @php
+                                $level = $groupedByLevel->first()->level;
+                            @endphp
+                            <details class="collapse bg-base-100 border-base-300 border mb-3">
+                                <summary class="collapse-title font-semibold">{{ $level->program->code}} - {{ $level->description }}</summary>
+                                <div class="collapse-content text-sm">
+                                    <table class="table table-zebra">
+                                        <thead>
+                                            <tr>
+                                                <th>Code</th>
+                                                <th>Description</th>
+                                                <th>Unit</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($groupedByLevel as $prospectus)
+                                            <tr class="cursor-pointer hover:bg-blue-50 transition-colors duration-150"
+                                                onclick="addOfferingWithProgram({{ $prospectus->subject->id }}, {{ $level->program->id }})">
+                                                <td>{{ $prospectus->subject->code }}</td>
+                                                <td>{{ $prospectus->subject->description }}</td>
+                                                <td>{{ $prospectus->subject->unit }}</td>
+                                            </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>  
+                            </details>
+                            @endforeach
+                        </div>
+                        @else
+                        <div class="m-4 alert bg-blue-400 text-white">
+                            <span>No prospectuses found for the selected criteria.</span>
+                        </div>
+                        @endif
+                        </div>
                     @else
-                    <div class="m-4 alert bg-blue-400 text-white">
-                        <span>No prospectuses found for the selected criteria.</span>
-                    </div>
+                        <div id="prospectusContainer"></div>
                     @endif
+                </div>
+            </div>
+
+            <!-- Subject Search Tab -->
+            <div id="panelSubject" class="hidden">
+                <div class="p-4">
+                    <div class="flex gap-2 items-center">
+                        <input type="text" id="subjectSearchInput" placeholder="Search subject code or description..." class="input input-bordered grow" />
                     </div>
-                @else
-                    <div id="prospectusContainer"></div>
-                @endif
+                </div>
+                <div class="px-4 pb-4">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Description</th>
+                                <th>Unit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectSearchResults">
+                            <tr>
+                                <td colspan="3" class="text-center text-gray-500 py-8">Type to search subjects...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     
@@ -85,31 +126,27 @@
             <table class="table table-zebra">
                 <thead>
                     <tr>
-                        <th>ID</th>
                         <th>Code</th>
                         <th>Description</th>
                         <th>Units</th>
-                        <th>Final Grade</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="subjectOfferingTableBody">
                     @if(isset($subjectOfferings) && $subjectOfferings->count() > 0)
                         @foreach ($subjectOfferings as $offering)
-                        <tr>
-                            <td>{{ $offering->id }}</td>
+                        <tr id="offering-{{ $offering->id }}">
                             <td>{{ $offering->code }}</td>
                             <td>{{ $offering->description }}</td>
                             <td>{{ $offering->subject->unit ?? '-' }}</td>
-                            <td>-</td>
                             <td>
-                                <button class="btn btn-sm btn-ghost text-primary font-semibold">View</button>
+                                <button type="button" class="btn btn-sm btn-ghost text-red-600 font-semibold" onclick="removeOffering({{ $offering->id }})">Remove</button>
                             </td>
                         </tr>
                         @endforeach
                     @else
-                        <tr>
-                            <td colspan="6" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
+                        <tr id="no-offerings-row">
+                            <td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
                         </tr>
                     @endif
                 </tbody>
@@ -117,12 +154,191 @@
         </div>
     </div>
 
+    <!-- Program Selection Modal (for subject search tab - subjects without program context) -->
+    <dialog id="programSelectModal" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold mb-4">Select Program</h3>
+            <p class="text-sm text-gray-500 mb-3">Choose the program this subject will be offered under:</p>
+            <input type="hidden" id="pendingSubjectId" value="" />
+            <div class="form-control">
+                <select id="programSelect" class="select select-bordered w-full" required>
+                    <option value="">-- Select Program --</option>
+                    @foreach ($programs as $program)
+                        <option value="{{ $program->id }}">{{ $program->code }} - {{ $program->description }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('programSelectModal').close();">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmAddWithProgram()">Add to Offerings</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
 </x-department_sidebar>
 
 <script>
     const curriculaApiUrl = '{{ url("/department/api/curricula-by-department") }}';
+    const subjectOfferingApiUrl = '{{ url("/department/api/subject-offering") }}';
+    const addSubjectOfferingUrl = '{{ route("department.subject_offering.add") }}';
+    const removeSubjectOfferingUrl = '{{ url("/department/subject-offering") }}';
+    const searchSubjectsUrl = '{{ route("department.api.subjects.search") }}';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const academicTermId = {{ isset($academicTerm) ? $academicTerm->id : 'null' }};
+    const departmentId = {{ $departmentId ?? 'null' }};
 
-    // Load curricula by department
+    // Tab switching
+    function switchTab(tab) {
+        const tabProspectus = document.getElementById('tabProspectus');
+        const tabSubject = document.getElementById('tabSubject');
+        const panelProspectus = document.getElementById('panelProspectus');
+        const panelSubject = document.getElementById('panelSubject');
+
+        if (tab === 'prospectus') {
+            tabProspectus.className = 'flex-1 py-3 px-4 text-sm font-semibold text-center bg-black text-white transition-colors duration-200';
+            tabSubject.className = 'flex-1 py-3 px-4 text-sm font-semibold text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200';
+            panelProspectus.classList.remove('hidden');
+            panelSubject.classList.add('hidden');
+        } else {
+            tabSubject.className = 'flex-1 py-3 px-4 text-sm font-semibold text-center bg-black text-white transition-colors duration-200';
+            tabProspectus.className = 'flex-1 py-3 px-4 text-sm font-semibold text-center bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200';
+            panelSubject.classList.remove('hidden');
+            panelProspectus.classList.add('hidden');
+        }
+    }
+
+    // For prospectus rows — program is already known from the level
+    function addOfferingWithProgram(subjectId, programId) {
+        if (!academicTermId) {
+            alert('No academic term selected.');
+            return;
+        }
+        submitAddOffering(subjectId, programId);
+    }
+
+    // For subject search rows — need to pick a program first
+    function openProgramModal(subjectId) {
+        if (!academicTermId) {
+            alert('No academic term selected.');
+            return;
+        }
+        document.getElementById('pendingSubjectId').value = subjectId;
+        document.getElementById('programSelect').value = '';
+        document.getElementById('programSelectModal').showModal();
+    }
+
+    function confirmAddWithProgram() {
+        const subjectId = document.getElementById('pendingSubjectId').value;
+        const programId = document.getElementById('programSelect').value;
+        if (!programId) {
+            alert('Please select a program.');
+            return;
+        }
+        document.getElementById('programSelectModal').close();
+        submitAddOffering(subjectId, programId);
+    }
+
+    // Shared add offering function
+    async function submitAddOffering(subjectId, programId) {
+        try {
+            const response = await fetch(addSubjectOfferingUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+                body: JSON.stringify({
+                    academic_term_id: academicTermId,
+                    subject_id: subjectId,
+                    program_id: programId,
+                })
+            });
+
+            if (response.status === 422) {
+                const data = await response.json();
+                alert(data.error || 'Subject already added.');
+                return;
+            }
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            const newOffering = await response.json();
+            appendOfferingRow(newOffering);
+        } catch (error) {
+            console.error('Error adding subject offering:', error);
+            alert('Error adding subject offering.');
+        }
+    }
+
+    // Remove subject offering
+    async function removeOffering(offeringId) {
+        if (!confirm('Remove this subject from offerings?')) return;
+
+        try {
+            const response = await fetch(`${removeSubjectOfferingUrl}/${offeringId}/remove`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                },
+            });
+
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+            document.getElementById(`offering-${offeringId}`)?.remove();
+
+            const tbody = document.getElementById('subjectOfferingTableBody');
+            if (tbody.children.length === 0) {
+                tbody.innerHTML = '<tr id="no-offerings-row"><td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error removing subject offering:', error);
+            alert('Error removing subject offering.');
+        }
+    }
+
+    // Append a new offering row to the table
+    function appendOfferingRow(offering) {
+        const tbody = document.getElementById('subjectOfferingTableBody');
+        const noRow = document.getElementById('no-offerings-row');
+        if (noRow) noRow.remove();
+
+        const row = document.createElement('tr');
+        row.id = `offering-${offering.id}`;
+        row.innerHTML = `
+            <td>${offering.code}</td>
+            <td>${offering.description}</td>
+            <td>${offering.subject?.unit ?? '-'}</td>
+            <td><button type="button" class="btn btn-sm btn-ghost text-red-600 font-semibold" onclick="removeOffering(${offering.id})">Remove</button></td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    // Load subject offerings by academic term (for refresh)
+    async function loadSubjectOfferings() {
+        if (!academicTermId || !departmentId) return;
+
+        try {
+            const response = await fetch(`${subjectOfferingApiUrl}/${academicTermId}/${departmentId}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const offerings = await response.json();
+
+            const tbody = document.getElementById('subjectOfferingTableBody');
+            tbody.innerHTML = '';
+
+            if (offerings.length > 0) {
+                offerings.forEach(offering => appendOfferingRow(offering));
+            } else {
+                tbody.innerHTML = '<tr id="no-offerings-row"><td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error loading subject offerings:', error);
+        }
+    }
+
+    // Load curricula by department (dynamic)
     async function loadCurriculaByDepartment(departmentId, selectElement, selectedCurriculumId = null) {
         if (!departmentId) {
             selectElement.innerHTML = '<option value="">--Select Curriculum--</option>';
@@ -166,9 +382,53 @@
     document.addEventListener('DOMContentLoaded', function() {
         const departmentSelect = document.getElementById('departmentSelect');
         const curriculumSelect = document.getElementById('curriculumSelect');
+
         if (departmentSelect.value) {
             const oldCurriculum = '{{ $old_curriculum ?? '' }}';
             loadCurriculaByDepartment(departmentSelect.value, curriculumSelect, oldCurriculum || null);
         }
+    });
+
+    // Subject search with debounce
+    let searchTimeout = null;
+    document.getElementById('subjectSearchInput')?.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        const tbody = document.getElementById('subjectSearchResults');
+
+        if (query.length < 1) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-8">Type to search subjects...</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-4">Searching...</td></tr>';
+
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`${searchSubjectsUrl}?q=${encodeURIComponent(query)}`);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const subjects = await response.json();
+
+                tbody.innerHTML = '';
+                if (subjects.length > 0) {
+                    subjects.forEach(subject => {
+                        const row = document.createElement('tr');
+                        row.className = 'cursor-pointer hover:bg-blue-50 transition-colors duration-150';
+                        row.onclick = () => openProgramModal(subject.id);
+                        row.innerHTML = `
+                            <td>${subject.code}</td>
+                            <td>${subject.description}</td>
+                            <td>${subject.unit}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-8">No subjects found.</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error searching subjects:', error);
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-red-500 py-8">Error searching subjects.</td></tr>';
+            }
+        }, 300);
     });
 </script>        

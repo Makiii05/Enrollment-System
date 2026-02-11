@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('access-accounting', fn($user) => $user->type === 'accounting');
         Gate::define('access-admission', fn($user) => $user->type === 'admission');
         Gate::define('access-department', function($user) {
-            return \App\Models\Department::where('code', $user->type)->exists();
+            return $user->department_id !== null;
         });
     }
 }

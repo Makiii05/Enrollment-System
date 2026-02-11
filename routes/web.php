@@ -159,7 +159,11 @@ Route::prefix('department')->name('department.')->group(function () {
 
         Route::get('/subject-offering', [SubjectOfferingController::class, 'showSubjectOffering'])->name('subject_offering');
         Route::post('/subject-offering/search', [SubjectOfferingController::class, 'searchOffering'])->name('subject_offering.search');
+        Route::post('/subject-offering/add', [SubjectOfferingController::class, 'addSubjectOffering'])->name('subject_offering.add');
+        Route::delete('/subject-offering/{id}/remove', [SubjectOfferingController::class, 'removeSubjectOffering'])->name('subject_offering.remove');
         Route::get('/api/curricula-by-department/{departmentId}', [SubjectOfferingController::class, 'getCurriculaByDepartment'])->name('api.curricula');
+        Route::get('/api/subject-offering/{academicTermId}/{departmentId}', [SubjectOfferingController::class, 'getSubjectOffering'])->name('api.subject_offering');
+        Route::get('/api/subjects/search', [SubjectOfferingController::class, 'searchSubjects'])->name('api.subjects.search');
     });
 });
 

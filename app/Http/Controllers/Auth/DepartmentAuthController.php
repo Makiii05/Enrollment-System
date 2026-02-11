@@ -27,9 +27,8 @@ class DepartmentAuthController extends Controller
         if (Auth::attempt($validated)) {
             $request->session()->regenerate();
             $user = auth()->user();
-            // Department users have their type set to a department code
-            $departmentCodes = Department::pluck('code')->toArray();
-            if ($user && in_array($user->type, $departmentCodes)) {
+            // Department users must have a department_id assigned
+            if ($user && $user->department_id) {
                 return redirect()->route('department.dashboard');
             } else {
                 Auth::logout();

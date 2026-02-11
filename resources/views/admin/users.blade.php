@@ -33,7 +33,7 @@
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
-                    <td>{{ ucfirst($user->type) }}</td>
+                    <td>{{ $user->department_id ? ($user->department->code ?? 'Department') : ucfirst($user->type) }}</td>
                     <td>{{ ucfirst($user->role) }}</td>
                     <td>{{ $user->created_at->format('M d, Y') }}</td>
                     <td>
@@ -88,14 +88,23 @@
                     <label class="label">
                         <span class="label-text">Office</span>
                     </label>
-                    <select name="type" class="select select-bordered w-full" required>
+                    <select name="type" id="add_type" class="select select-bordered w-full" required onchange="toggleDepartmentSelect('add')">
                         <option value="">Select Office</option>
                         <option value="admin">Admin</option>
                         <option value="registrar">Registrar</option>
                         <option value="admission">Admission</option>
                         <option value="accounting">Accounting</option>
+                        <option value="department">Department</option>
+                    </select>
+                </div>
+                <div class="form-control mb-4" id="add_department_group" style="display:none;">
+                    <label class="label">
+                        <span class="label-text">Department</span>
+                    </label>
+                    <select name="department_id" id="add_department_id" class="select select-bordered w-full">
+                        <option value="">Select Department</option>
                         @foreach($departments as $department)
-                            <option value="{{ $department->code }}">{{ $department->code }}</option>
+                            <option value="{{ $department->id }}">{{ $department->code }} - {{ $department->description }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -156,14 +165,23 @@
                     <label class="label">
                         <span class="label-text">Type</span>
                     </label>
-                    <select name="type" id="edit_type" class="select select-bordered w-full" required>
+                    <select name="type" id="edit_type" class="select select-bordered w-full" required onchange="toggleDepartmentSelect('edit')">
                         <option value="">Select Type</option>
                         <option value="admin">Admin</option>
                         <option value="registrar">Registrar</option>
                         <option value="admission">Admission</option>
                         <option value="accounting">Accounting</option>
+                        <option value="department">Department</option>
+                    </select>
+                </div>
+                <div class="form-control mb-4" id="edit_department_group" style="display:none;">
+                    <label class="label">
+                        <span class="label-text">Department</span>
+                    </label>
+                    <select name="department_id" id="edit_department_id" class="select select-bordered w-full">
+                        <option value="">Select Department</option>
                         @foreach($departments as $department)
-                            <option value="{{ $department->code }}">{{ $department->name }}</option>
+                            <option value="{{ $department->id }}">{{ $department->code }} - {{ $department->description }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -219,12 +237,40 @@
     </dialog>
 
     <script>
+        function toggleDepartmentSelect(prefix) {
+            const typeSelect = document.getElementById(prefix + '_type');
+            const deptGroup = document.getElementById(prefix + '_department_group');
+            const deptSelect = document.getElementById(prefix + '_department_id');
+
+            if (typeSelect.value === 'department') {
+                deptGroup.style.display = '';
+                deptSelect.required = true;
+            } else {
+                deptGroup.style.display = 'none';
+                deptSelect.required = false;
+                deptSelect.value = '';
+            }
+        }
+
         function openEditModal(user) {
             document.getElementById('edit_name').value = user.name;
             document.getElementById('edit_email').value = user.email;
-            document.getElementById('edit_type').value = user.type;
             document.getElementById('edit_role').value = user.role;
             document.getElementById('editUserForm').action = `/admin/users/${user.id}/update`;
+
+            // Set type: if user has department_id, they are a department user
+            if (user.department_id) {
+                document.getElementById('edit_type').value = 'department';
+                document.getElementById('edit_department_id').value = user.department_id;
+                document.getElementById('edit_department_group').style.display = '';
+                document.getElementById('edit_department_id').required = true;
+            } else {
+                document.getElementById('edit_type').value = user.type;
+                document.getElementById('edit_department_group').style.display = 'none';
+                document.getElementById('edit_department_id').required = false;
+                document.getElementById('edit_department_id').value = '';
+            }
+
             document.getElementById('edit_user_modal').showModal();
         }
 
