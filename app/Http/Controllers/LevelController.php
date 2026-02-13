@@ -10,7 +10,7 @@ class LevelController extends Controller
 {
     public function showLevel()
     {
-        $levels = Level::with('program')->orderBy('id', 'asc')->paginate(10);
+        $levels = Level::with('program')->orderBy('id', 'asc')->get();
         $programs = Program::where('status', 'active')->orderBy('id', 'asc')->get();
         
         return view('registrar.level', [

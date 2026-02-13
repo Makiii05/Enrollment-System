@@ -55,10 +55,11 @@
                 </div>
             </form>
             
+            <div data-table-wrapper>
             <div class="overflow-x-auto bg-white border shadow">
-                <table class="table table-zebra table-compact">
+                <table class="table table-zebra table-compact" data-sortable-table>
                     <thead>
-                        <tr><th>Description</th><th class="text-end">Amount</th><th class="w-24">Actions</th></tr>
+                        <tr><th>Description</th><th class="text-end">Amount</th><th class="w-24" data-no-sort>Actions</th></tr>
                     </thead>
                     <tbody>
                         @foreach ($major_fees as $fee)
@@ -74,7 +75,7 @@
                             </td>
                         </tr>
                         @endforeach
-                        <tr>
+                        <tr data-sort-ignore>
                             <th class="text-end">Total</th>    
                             <th class="text-end">{{ $major_fees->sum('amount') }}</th>
                             <th></th>    
@@ -82,7 +83,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+            </div>
 
         <div class="mb-8 flex flex-col bg-white shadow p-4">
             <h3 class="text-lg font-bold mb-4">Other Fees</h3>
@@ -118,10 +119,11 @@
                 </div>
             </form>
             
+            <div data-table-wrapper>
             <div class="overflow-x-auto bg-white border shadow">
-                <table class="table table-zebra table-compact">
+                <table class="table table-zebra table-compact" data-sortable-table>
                     <thead>
-                        <tr><th>Description</th><th class="w-20">Type</th><th class="text-end">Amount</th><th class="w-24">Actions</th></tr>
+                        <tr><th>Description</th><th class="w-20">Type</th><th class="text-end">Amount</th><th class="w-24" data-no-sort>Actions</th></tr>
                     </thead>
                     <tbody>
                         @foreach ($other_fees as $fee)
@@ -138,7 +140,7 @@
                             </td>
                         </tr>
                         @endforeach
-                        <tr>
+                        <tr data-sort-ignore>
                             <th class="text-end" colspan="2">Total</th>    
                             <th class="text-end">{{ $other_fees->sum('amount') }}</th>
                             <th></th>    
@@ -146,7 +148,7 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+            </div>
 
         <div class="mb-8 flex flex-col bg-white shadow p-4">
             <h3 class="text-lg font-bold mb-4">Additional Fees</h3>
@@ -188,10 +190,11 @@
                 </div>
             </form>
             
+            <div data-table-wrapper>
             <div class="overflow-x-auto bg-white border shadow">
-                <table class="table table-zebra table-compact">
+                <table class="table table-zebra table-compact" data-sortable-table>
                     <thead>
-                        <tr><th>Description</th><th class="w-20">Type</th><th class="w-24">Months to Pay</th><th class="text-end">Amount</th><th class="w-24">Actions</th></tr>
+                        <tr><th>Description</th><th class="w-20">Type</th><th class="w-24">Months to Pay</th><th class="text-end">Amount</th><th class="w-24" data-no-sort>Actions</th></tr>
                     </thead>
                     <tbody>
                         @foreach ($additional_fees as $fee)
@@ -209,7 +212,7 @@
                             </td>
                         </tr>
                         @endforeach
-                        <tr>
+                        <tr data-sort-ignore>
                             <th class="text-end" colspan="3">Total</th>    
                             <th class="text-end">{{ $additional_fees->sum('amount') }}</th>
                             <th></th>    
@@ -217,9 +220,11 @@
                     </tbody>
                 </table>
             </div>
-        </div>
+            </div>
     </div>
     @endif
+
+    @include('partials.table-sort-search')
 
     <!-- Edit Modals for Major Fees -->
     @if(isset($major_fees))

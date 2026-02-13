@@ -10,7 +10,7 @@ class AcademicTermController extends Controller
 {
     public function showAcademicTerm()
     {
-        $academicTerms = AcademicTerm::orderBy("created_at", "asc")->paginate(10);
+        $academicTerms = AcademicTerm::orderBy("created_at", "asc")->get();
         $departments = Department::orderBy("created_at", "asc")->get();
         return view('registrar.academic_term', [
             'academicTerms' => $academicTerms,

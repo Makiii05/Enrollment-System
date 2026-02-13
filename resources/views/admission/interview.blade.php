@@ -42,12 +42,13 @@
         </div>
         
         <!--TABLE-->
+        <div data-table-wrapper>
         <div class="overflow-x-auto bg-white shadow">
-            <table class="table">
+            <table class="table" data-sortable-table>
                 <!-- head -->
                 <thead>
                     <tr>
-                        <th>
+                        <th data-no-sort>
                             <input type="checkbox" id="selectAll" class="checkbox">
                         </th>
                         <th>Id</th>
@@ -57,7 +58,7 @@
                         <th>Remark</th>
                         <th>Result</th>
                         <th>Schedule</th>
-                        <th></th>
+                        <th data-no-sort></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,10 +93,10 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">
-            {{ $applicants->links() }}
         </div>
     </form>
+
+    @include('partials.table-sort-search')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

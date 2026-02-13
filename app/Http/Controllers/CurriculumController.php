@@ -10,7 +10,7 @@ class CurriculumController extends Controller
 {
     //
     public function showCurriculum(){
-        $curricula = Curriculum::orderBy("created_at", "asc")->orderBy("status", "asc")->paginate(10);
+        $curricula = Curriculum::orderBy("created_at", "asc")->orderBy("status", "asc")->get();
         $departments = Department::orderBy("created_at", "asc")->get();
         return view('registrar.curriculum', [
             'curricula' => $curricula,

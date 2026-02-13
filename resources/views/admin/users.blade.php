@@ -13,8 +13,9 @@
     </div>
 
     <!--TABLE-->
+    <div data-table-wrapper>
     <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -24,7 +25,7 @@
                     <th>Office</th>
                     <th>Role</th>
                     <th>Created At</th>
-                    <th>Actions</th>
+                    <th data-no-sort>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -59,9 +60,9 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-4">
-        {{ $users->links() }}
     </div>
+
+    @include('partials.table-sort-search')
 
     <!-- Add User Modal -->
     <dialog id="add_user_modal" class="modal">
@@ -116,6 +117,8 @@
                         <option value="">Select Role</option>
                         <option value="head">Head</option>
                         <option value="proctor">Proctor</option>
+                        <option value="guidance">Guidance</option>
+                        <option value="principal">Principal</option>
                     </select>
                 </div>
                 <div class="form-control mb-4">
@@ -193,6 +196,8 @@
                         <option value="">Select Role</option>
                         <option value="head">Head</option>
                         <option value="proctor">Proctor</option>
+                        <option value="guidance">Guidance</option>
+                        <option value="principal">Principal</option>
                     </select>
                 </div>
                 <div class="form-control mb-4">

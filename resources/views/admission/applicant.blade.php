@@ -45,19 +45,20 @@
         </div>
         
         <!--TABLE-->
+        <div data-table-wrapper>
         <div class="overflow-x-auto bg-white shadow">
-            <table class="table">
+            <table class="table" data-sortable-table>
                 <!-- head -->
                 <thead>
                     <tr>
-                        <th>
+                        <th data-no-sort>
                             <input type="checkbox" id="selectAll" class="checkbox">
                         </th>
                         <th>Id</th>
                         <th>Application No.</th>
                         <th>Applicant Name</th>
                         <th>Status</th>
-                        <th>Details</th>
+                        <th data-no-sort>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -101,10 +102,10 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-4">
-            {{ $applicants->links() }}
         </div>
     </form>
+
+    @include('partials.table-sort-search')
 
     @include('partials.applicant-delete-modal')
 

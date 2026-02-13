@@ -23,7 +23,7 @@ class AdmissionProcessController extends Controller
             $query->where('interview_schedule_id', $request->schedule_id);
         }
         
-        $applicants = $query->paginate(20);
+        $applicants = $query->get();
         $levels = Level::orderBy('program_id')->get();
             
         return view('admission.interview', [
@@ -44,7 +44,7 @@ class AdmissionProcessController extends Controller
             $query->where('exam_schedule_id', $request->schedule_id);
         }
         
-        $applicants = $query->paginate(20);
+        $applicants = $query->get();
         $levels = Level::orderBy('program_id')->get();
 
         return view('admission.entrance_exam', [
@@ -66,7 +66,7 @@ class AdmissionProcessController extends Controller
             $query->where('evaluation_schedule_id', $request->schedule_id);
         }
         
-        $applicants = $query->paginate(20);
+        $applicants = $query->get();
         $levels = Level::orderBy('program_id')->get();
 
         return view('admission.final_eval', [

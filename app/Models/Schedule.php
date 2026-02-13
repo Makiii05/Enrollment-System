@@ -26,6 +26,12 @@ class Schedule extends Model
         return $this->belongsTo(User::class, 'proctor_id');
     }
 
+    // Alias for assigned person (admission staff or process facilitator)
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'proctor_id');
+    }
+
     public function admissions()
     {
         return $this->hasMany(Admission::class);

@@ -9,7 +9,7 @@ class DepartmentController extends Controller
 {
     //
     public function showDepartment(){
-        $departments = Department::orderBy("created_at", "asc")->paginate(10);
+        $departments = Department::orderBy("created_at", "asc")->get();
         return view('registrar.department', [
             'departments' => $departments
         ]);

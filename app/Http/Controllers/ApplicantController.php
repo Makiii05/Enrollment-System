@@ -107,7 +107,7 @@ class ApplicantController extends Controller
     public function showApplicant(){
         $applicants = Applicant::with('admission')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->get();
 
         return view('admission.applicant', [
             'applicants' => $applicants,

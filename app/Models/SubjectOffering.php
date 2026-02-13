@@ -12,6 +12,7 @@ class SubjectOffering extends Model
         'academic_term_id',
         'subject_id',
         'department_id',
+        'program_id',
         'code',
         'description',
     ];
@@ -29,6 +30,11 @@ class SubjectOffering extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
+    }
+
+    public function program(): BelongsTo
+    {
+        return $this->belongsTo(Program::class);
     }
 
     public function enlistments(): HasMany

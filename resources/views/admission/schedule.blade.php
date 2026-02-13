@@ -6,7 +6,6 @@
 
     @include('partials.notifications')
     @include('partials.schedule-applicants-modal')
-    @if(auth()->user()->role == 'head')
     <div class="m-4 grid">
         <button class="btn w-auto justify-self-end bg-white shadow" onclick="form_modal.showModal()">Add Schedule</button>
     </div>
@@ -21,13 +20,20 @@
                 
                 <div class="form-control">
                     <label class="label">
-                        <span class="label-text">Proctor</span>
+                        <span class="label-text">Assign To</span>
                     </label>
                     <select name="proctor_id" class="select select-bordered w-full" required>
-                        <option value="">Select Proctor</option>
-                        @foreach($proctors as $proctor)
-                            <option value="{{ $proctor->id }}">{{ $proctor->name }}</option>
-                        @endforeach
+                        <option value="">Select Person</option>
+                        <optgroup label="Admission Staff">
+                            @foreach($admissionStaff as $staff)
+                                <option value="{{ $staff->id }}">{{ $staff->name }} ({{ ucfirst($staff->role) }})</option>
+                            @endforeach
+                        </optgroup>
+                        <optgroup label="Process Facilitators">
+                            @foreach($processFacilitators as $facilitator)
+                                <option value="{{ $facilitator->id }}">{{ $facilitator->name }} ({{ ucfirst($facilitator->role) }})</option>
+                            @endforeach
+                        </optgroup>
                     </select>
                 </div>
 
@@ -82,10 +88,11 @@
             </form>
         </div>
     </dialog>
-    @endif
     <!--TABLE-->
+    <!--TABLE-->
+    <div data-table-wrapper>
     <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -97,7 +104,7 @@
                     <th>Type</th>
                     <th>Applicants</th>
                     <th>Status</th>
-                    <th></th>
+                    <th data-no-sort></th>
                 </tr>
             </thead>
             <tbody>
@@ -112,8 +119,8 @@
                     <td>{{ $schedule->applicants->count() }}</td>
                     <td>{{ $schedule->status }}</td>
                     <td class="flex gap-2 items-center">
-                        @if(auth()->user()->role === 'proctor')
-                            {{-- Proctor: redirect to appropriate process page --}}
+                        @if(in_array(auth()->user()->role, ['proctor', 'head']))
+                            {{-- Admission staff: can view applicants and print --}}
                             @php
                                 $redirectRoute = match($schedule->process) {
                                     'exam' => route('admission.exam'),
@@ -147,7 +154,7 @@
                             >view</button>
                             <a href="{{ route('admission.print.schedule.applicants', $schedule->id) }}" target="_blank" class="text-purple-600 hover:underline">print</a>
                         @endif
-                        @if(auth()->user()->role == 'head')
+                        @if(in_array(auth()->user()->role, ['head']))
                         <button class="text-green-600 hover:underline" onclick="editSchedule({{ $schedule->id }}, {{ $schedule->proctor_id ?? 'null' }}, '{{ $schedule->date->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($schedule->start_time)->format('H:i') }}', '{{ \Carbon\Carbon::parse($schedule->end_time)->format('H:i') }}', '{{ $schedule->status }}', '{{ $schedule->process }}')">edit</button>
                         <form action="{{ route('admission.schedule.delete', $schedule->id) }}" method="POST" style="display:inline;">
                             @csrf
@@ -160,16 +167,22 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-4">
-        {{ $schedules->links() }}
     </div>
+
+    @include('partials.table-sort-search')
     
     <script>
-        const proctorsList = @json($proctors);
+        const admissionStaff = @json($admissionStaff);
+        const processFacilitators = @json($processFacilitators);
+        const allAssignableUsers = [...admissionStaff, ...processFacilitators];
         
         function editSchedule(id, proctorId, date, start_time, end_time, status, process) {
-            const proctorOptions = proctorsList.map(p => 
-                `<option value="${p.id}" ${p.id === proctorId ? 'selected' : ''}>${p.name}</option>`
+            const staffOptions = admissionStaff.map(s => 
+                `<option value="${s.id}" ${s.id === proctorId ? 'selected' : ''}>${s.name} (${s.role.charAt(0).toUpperCase() + s.role.slice(1)})</option>`
+            ).join('');
+            
+            const facilitatorOptions = processFacilitators.map(f => 
+                `<option value="${f.id}" ${f.id === proctorId ? 'selected' : ''}>${f.name} (${f.role.charAt(0).toUpperCase() + f.role.slice(1)})</option>`
             ).join('');
             
             document.getElementById('form_modal').innerHTML = `
@@ -183,11 +196,16 @@
                         
                         <div class="form-control">
                             <label class="label">
-                                <span class="label-text">Proctor</span>
+                                <span class="label-text">Assign To</span>
                             </label>
                             <select name="proctor_id" class="select select-bordered w-full" required>
-                                <option value="">Select Proctor</option>
-                                ${proctorOptions}
+                                <option value="">Select Person</option>
+                                <optgroup label="Admission Staff">
+                                    ${staffOptions}
+                                </optgroup>
+                                <optgroup label="Process Facilitators">
+                                    ${facilitatorOptions}
+                                </optgroup>
                             </select>
                         </div>
 

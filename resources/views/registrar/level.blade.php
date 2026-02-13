@@ -58,8 +58,9 @@
         </div>
     </dialog>
     <!--TABLE-->
+    <div data-table-wrapper>
     <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -68,7 +69,7 @@
                     <th>Description</th>
                     <th>Program</th>
                     <th>Order</th>
-                    <th></th>
+                    <th data-no-sort></th>
                 </tr>
             </thead>
             <tbody>
@@ -91,9 +92,9 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-4">
-        {{ $levels->links() }}
     </div>
+
+    @include('partials.table-sort-search')
     
     <script>
         function editLevel(id, code, description, programId, order) {

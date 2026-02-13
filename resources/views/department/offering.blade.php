@@ -28,21 +28,21 @@
             <!-- Prospectus Search Tab -->
             <div id="panelProspectus">
                 <div class="p-4">
-                    <form action="{{ route('department.subject_offering.search') }}" method="POST" class="grow flex gap-2 items-center flex-wrap">
+                    <form action="{{ route('department.subject_offering.search') }}" method="POST" class="grow flex gap-2 items-center">
                         @csrf
                         @if(isset($academicTerm))
                         <input type="hidden" name="academic_term_id" value="{{ $academicTerm->id }}" />
                         @endif
-                        <select name="department" id="departmentSelect" class="select select-bordered" required>
+                        <select name="department" id="departmentSelect" class="select select-bordered select-sm" required>
                             <option value="">--Select Department--</option>
                             @foreach ($departments as $department)
                             <option value="{{ $department->id }}" @if(isset($old_department) && $old_department == $department->id) selected @endif>{{ $department->description }}</option>
                             @endforeach
                         </select>
-                        <select name="curriculum" id="curriculumSelect" class="select select-bordered" required>
+                        <select name="curriculum" id="curriculumSelect" class="select select-bordered select-sm" required>
                             <option value="">--Select Curriculum--</option>
                         </select>
-                        <button type="submit" class="btn bg-white">Search</button>
+                        <button type="submit" class="btn btn-sm btn-neutral">Search</button>
                     </form>
                 </div>
                 <div>
@@ -119,40 +119,44 @@
         </div>
     
         <!--SUBJECT OFFERING TABLE-->
-        <div class="overflow-x-auto bg-white shadow w-1/2">
-            <div class="p-4">
-                <h3 class="font-semibold text-lg">Subject Offerings</h3>
+        <div class="overflow-x-auto shadow w-1/2 bg-white p-2">
+            <div class="bg-white" data-table-wrapper>
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg">Subject Offerings</h3>
+                </div>
+                <table class="table table-zebra" data-sortable-table>
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Units</th>
+                            <th data-no-sort>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectOfferingTableBody">
+                        @if(isset($subjectOfferings) && $subjectOfferings->count() > 0)
+                            @foreach ($subjectOfferings as $offering)
+                            <tr id="offering-{{ $offering->id }}">
+                                <td>{{ $offering->code }}</td>
+                                <td>{{ $offering->description }}</td>
+                                <td>{{ $offering->subject->unit ?? '-' }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-ghost text-red-600 font-semibold" onclick="removeOffering({{ $offering->id }})">Remove</button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        @else
+                            <tr id="no-offerings-row">
+                                <td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
             </div>
-            <table class="table table-zebra">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Description</th>
-                        <th>Units</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="subjectOfferingTableBody">
-                    @if(isset($subjectOfferings) && $subjectOfferings->count() > 0)
-                        @foreach ($subjectOfferings as $offering)
-                        <tr id="offering-{{ $offering->id }}">
-                            <td>{{ $offering->code }}</td>
-                            <td>{{ $offering->description }}</td>
-                            <td>{{ $offering->subject->unit ?? '-' }}</td>
-                            <td>
-                                <button type="button" class="btn btn-sm btn-ghost text-red-600 font-semibold" onclick="removeOffering({{ $offering->id }})">Remove</button>
-                            </td>
-                        </tr>
-                        @endforeach
-                    @else
-                        <tr id="no-offerings-row">
-                            <td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
-                        </tr>
-                    @endif
-                </tbody>
-            </table>
         </div>
     </div>
+
+    @include('partials.table-sort-search')
 
     <!-- Program Selection Modal (for subject search tab - subjects without program context) -->
     <dialog id="programSelectModal" class="modal">

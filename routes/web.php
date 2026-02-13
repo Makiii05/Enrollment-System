@@ -21,6 +21,7 @@ use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\DepartmentAuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubjectOfferingController;
+use App\Http\Controllers\EnlistmentController;
 use App\Http\Controllers\PdfController;
 
 Route::get('/', function () {return view('index');})->name('index');
@@ -155,7 +156,17 @@ Route::prefix('department')->name('department.')->group(function () {
         Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
         Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
 
-        Route::get('/enlistment', [StudentController::class, 'showEnlistment'])->name('enlistment');
+        Route::get('/enlistment', [EnlistmentController::class, 'showEnlistment'])->name('enlistment');
+        Route::get('/enlistment/{student_id}/{academic_term_id}', [EnlistmentController::class, 'viewStudentSubjects'])->name('student.subjects');
+        Route::post('/enlistment/{id}/update', [EnlistmentController::class, 'updateStudentEnlistmentApi'])->name('enlistment.update');
+        
+        // Enlistment API routes
+        Route::get('/api/subject-offerings/{academicTermId}', [EnlistmentController::class, 'getSubjectOfferingsApi'])->name('api.enlistment.offerings');
+        Route::get('/api/sections/{academicTermId}', [EnlistmentController::class, 'getSectionsApi'])->name('api.enlistment.sections');
+        Route::get('/api/enlistments/{studentId}/{academicTermId}', [EnlistmentController::class, 'getStudentEnlistmentsApi'])->name('api.enlistment.list');
+        Route::post('/api/enlistment/add', [EnlistmentController::class, 'addEnlistmentApi'])->name('api.enlistment.add');
+        Route::post('/api/enlistment/add-section', [EnlistmentController::class, 'addEnlistmentBySectionApi'])->name('api.enlistment.add-section');
+        Route::delete('/api/enlistment/{id}/remove', [EnlistmentController::class, 'removeEnlistmentApi'])->name('api.enlistment.remove');
 
         Route::get('/subject-offering', [SubjectOfferingController::class, 'showSubjectOffering'])->name('subject_offering');
         Route::post('/subject-offering/search', [SubjectOfferingController::class, 'searchOffering'])->name('subject_offering.search');

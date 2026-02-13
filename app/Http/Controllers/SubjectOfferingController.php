@@ -134,21 +134,21 @@ class SubjectOfferingController extends Controller
         $subject = Subject::findOrFail($validated['subject_id']);
         $program = Program::findOrFail($validated['program_id']);
 
-        // Prevent duplicates (same subject + program combo)
-        $exists = SubjectOffering::where('academic_term_id', $validated['academic_term_id'])
+        // Count existing offerings for this academic term, department, subject, AND program
+        $count = SubjectOffering::where('academic_term_id', $validated['academic_term_id'])
             ->where('department_id', $departmentId)
             ->where('subject_id', $validated['subject_id'])
-            ->exists();
+            ->where('program_id', $validated['program_id'])
+            ->count();
 
-        if ($exists) {
-            return response()->json(['error' => 'Subject already added to offerings.'], 422);
-        }
+        $sectionLetter = chr(65 + $count); // 0 → A, 1 → B, 2 → C, ...
 
         $subjectOffering = SubjectOffering::create([
             'academic_term_id' => $validated['academic_term_id'],
             'department_id' => $departmentId,
             'subject_id' => $validated['subject_id'],
-            'code' => $program->code . '-' . $subject->code,
+            'program_id' => $validated['program_id'],
+            'code' => $program->code . '-' . $subject->code . '-' . $sectionLetter,
             'description' => $subject->description,
         ]);
 

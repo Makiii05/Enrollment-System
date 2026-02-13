@@ -7,23 +7,11 @@
         @if(isset($academicTerm))
         <h2 class="flex-1 text-2xl"><span>(Academic Term: <strong>{{ $academicTerm->description }}</strong>)</span></h2>
         @endif
-        <div class="flex gap-2">
-            <input type="text" id="searchInput" placeholder="Search students..." class="input input-bordered w-64" />
-            <select id="statusFilter" class="select select-bordered">
-                <option value="">All Status</option>
-                <option value="enrolled">Enrolled</option>
-                <option value="regular">Regular</option>
-                <option value="irregular">Irregular</option>
-                <option value="withdrawn">Withdrawn</option>
-                <option value="dropped">Dropped</option>
-                <option value="graduated">Graduated</option>
-            </select>
-        </div>
     </div>
     
     <!--TABLE-->
-    <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+    <div class="overflow-x-auto bg-white shadow" data-table-wrapper>
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -32,7 +20,7 @@
                     <th>Program</th>
                     <th>Level</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th data-no-sort>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -45,13 +33,14 @@
                     <td>{{ ucfirst($student->status) }}</td>
                     <td>
                         <div class="flex gap-1 flex-wrap">
-                            <button 
+                            <a 
+                                href="{{ route('department.student.subjects', ['student_id' => $student->id, 'academic_term_id' => $academicTerm->id]) }}"
                                 type="button" 
                                 class="btn btn-sm btn-ghost text-primary font-semibold"
                                 onclick="event.stopPropagation();"
                             >
                                 View Subject
-                            </button>
+                            </a>
                         </div>
                     </td>
                 </tr>
@@ -63,37 +52,7 @@
             </tbody>
         </table>
     </div>
-    
-    @if(isset($students) && $students->hasPages())
-    <div class="mt-4">
-        {{ $students->links() }}
-    </div>
-    @endif
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const statusFilter = document.getElementById('statusFilter');
-            const tableRows = document.querySelectorAll('tbody tr');
-
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value.toLowerCase();
-
-                tableRows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    const statusCell = row.querySelector('td:nth-child(5)')?.textContent.toLowerCase().trim() || '';
-                    
-                    const matchesSearch = text.includes(searchTerm);
-                    const matchesStatus = statusValue === '' || statusCell.includes(statusValue);
-                    
-                    row.style.display = matchesSearch && matchesStatus ? '' : 'none';
-                });
-            }
-
-            searchInput.addEventListener('input', filterTable);
-            statusFilter.addEventListener('change', filterTable);
-        });
-    </script>
+    @include('partials.table-sort-search')
 
 </x-department_sidebar>

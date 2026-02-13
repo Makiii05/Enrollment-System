@@ -60,7 +60,7 @@ class AdminAuthController extends Controller
 
     public function showUsers()
     {
-        $users = User::with('department')->orderBy('created_at', 'desc')->paginate(20);
+        $users = User::with('department')->orderBy('created_at', 'desc')->get();
         $departments = Department::all();
 
         return view('admin.users', [
@@ -76,7 +76,7 @@ class AdminAuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'type' => 'required|string',
             'department_id' => 'nullable|exists:departments,id',
-            'role' => 'required|in:head,proctor',
+            'role' => 'required|in:head,proctor,guidance,principal',
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -102,7 +102,7 @@ class AdminAuthController extends Controller
             'email' => 'required|email|unique:users,email,' . $id,
             'type' => 'required|string',
             'department_id' => 'nullable|exists:departments,id',
-            'role' => 'required|in:head,proctor',
+            'role' => 'required|in:head,proctor,guidance,principal',
             'password' => 'nullable|string|min:8|confirmed',
         ]);
 

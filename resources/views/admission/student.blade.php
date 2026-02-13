@@ -8,21 +8,12 @@
 
     <div class="flex items-center gap-4 mb-4">
         <h2 class="font-bold text-4xl flex-1">Students</h2>
-        <div class="flex gap-2">
-            <input type="text" id="searchInput" placeholder="Search students..." class="input input-bordered w-64" />
-            <select id="statusFilter" class="select select-bordered">
-                <option value="">All Status</option>
-                <option value="enrolled">Enrolled</option>
-                <option value="withdrawn">Withdrawn</option>
-                <option value="dropped">Dropped</option>
-                <option value="graduated">Graduated</option>
-            </select>
-        </div>
     </div>
     
     <!--TABLE-->
+    <div data-table-wrapper>
     <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -32,7 +23,7 @@
                     <th>Program</th>
                     <th>Level</th>
                     <th>Status</th>
-                    <th>Actions</th>
+                    <th data-no-sort>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,37 +82,8 @@
             </tbody>
         </table>
     </div>
-    
-    @if(isset($students) && $students->hasPages())
-    <div class="mt-4">
-        {{ $students->links() }}
     </div>
-    @endif
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('searchInput');
-            const statusFilter = document.getElementById('statusFilter');
-            const tableRows = document.querySelectorAll('tbody tr');
-
-            function filterTable() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const statusValue = statusFilter.value.toLowerCase();
-
-                tableRows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    const statusCell = row.querySelector('td:nth-child(6)')?.textContent.toLowerCase().trim() || '';
-                    
-                    const matchesSearch = text.includes(searchTerm);
-                    const matchesStatus = statusValue === '' || statusCell.includes(statusValue);
-                    
-                    row.style.display = matchesSearch && matchesStatus ? '' : 'none';
-                });
-            }
-
-            searchInput.addEventListener('input', filterTable);
-            statusFilter.addEventListener('change', filterTable);
-        });
-    </script>
+    @include('partials.table-sort-search')
 
 </x-admission_sidebar>        

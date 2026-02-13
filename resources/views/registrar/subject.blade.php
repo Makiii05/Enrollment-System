@@ -98,8 +98,9 @@
         </div>
     </dialog>
     <!--TABLE-->
+    <div data-table-wrapper>
     <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -113,7 +114,7 @@
                     <th>Lab U</th>
                     <th>Type</th>
                     <th>Status</th>
-                    <th></th>
+                    <th data-no-sort></th>
                 </tr>
             </thead>
             <tbody>
@@ -141,9 +142,9 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-4">
-        {{ $subjects->links() }}
     </div>
+
+    @include('partials.table-sort-search')
     
     <script>
         function editSubject(id, code, description, unit, lech, lecu, labh, labu, type, status) {

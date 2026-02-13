@@ -13,17 +13,17 @@ class ScheduleController extends Controller
     {
         $user = auth()->user();
         
-        // If user is a proctor, only show their schedules
+        // If user has a role that can be assigned to schedules, show their schedules
         $query = Schedule::orderBy('date', 'desc')->orderBy('start_time', 'asc');
         
-        if ($user->role === 'proctor') {
+        if (in_array($user->role, ['proctor', 'guidance', 'principal'])) {
             $query->where('proctor_id', $user->id);
         }
         
-        $schedules = $query->paginate(10);
+        $schedules = $query->get();
         
         // Get applicants for each schedule
-        $schedules->getCollection()->transform(function ($schedule) {
+        $schedules->transform(function ($schedule) {
             $applicants = $schedule->process === 'exam'
                 ? Admission::where('exam_schedule_id', $schedule->id)->with('applicant')->get()->pluck('applicant')->filter()
                 : Admission::where('interview_schedule_id', $schedule->id)->with('applicant')->get()->pluck('applicant')->filter();
@@ -32,12 +32,14 @@ class ScheduleController extends Controller
             return $schedule;
         });
 
-        // Get users with proctor role
-        $proctors = User::where('role', 'proctor')->orderBy('name')->get();
+        // Get admission staff and process facilitators
+        $admissionStaff = User::whereIn('role', ['head', 'proctor'])->where('type', 'admission')->orderBy('name')->get();
+        $processFacilitators = User::whereIn('role', ['guidance', 'principal'])->orderBy('name')->get();
 
         return view('admission.schedule', [
             'schedules' => $schedules,
-            'proctors' => $proctors
+            'admissionStaff' => $admissionStaff,
+            'processFacilitators' => $processFacilitators
         ]);
     }
 

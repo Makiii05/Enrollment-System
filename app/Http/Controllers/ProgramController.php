@@ -10,7 +10,7 @@ class ProgramController extends Controller
 {
     //
     public function showProgram(){
-        $programs = Program::orderBy("created_at", "asc")->paginate(10);
+        $programs = Program::orderBy("created_at", "asc")->get();
         $departments = Department::orderBy("created_at", "asc")->get();
         return view('registrar.program', [
             'programs' => $programs,

@@ -9,7 +9,7 @@ class SubjectController extends Controller
 {
     //
     public function showSubject(){
-        $subjects = Subject::orderBy("created_at", "asc")->orderBy("status", "asc")->paginate(10);
+        $subjects = Subject::orderBy("created_at", "asc")->orderBy("status", "asc")->get();
         return view('registrar.subject', [
             'subjects' => $subjects
         ]);

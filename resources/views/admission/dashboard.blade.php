@@ -98,12 +98,12 @@
         </div>
 
         <!-- Data Table -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200" data-table-wrapper>
             <div class="px-5 py-4 border-b border-gray-200">
                 <h2 class="text-lg font-medium text-gray-800">Feeder School</h2>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full" data-sortable-table>
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">School</th>
@@ -133,6 +133,8 @@
                 </table>
             </div>
         </div>
+
+        @include('partials.table-sort-search')
     </div>
 
 </x-admission_sidebar>

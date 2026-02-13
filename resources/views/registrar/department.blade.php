@@ -49,8 +49,9 @@
         </div>
     </dialog>
     <!--TABLE-->
+    <div data-table-wrapper>
     <div class="overflow-x-auto bg-white shadow">
-        <table class="table">
+        <table class="table" data-sortable-table>
             <!-- head -->
             <thead>
                 <tr>
@@ -58,7 +59,7 @@
                     <th>Code</th>
                     <th>Description</th>
                     <th>Status</th>
-                    <th></th>
+                    <th data-no-sort></th>
                 </tr>
             </thead>
             <tbody>
@@ -80,9 +81,9 @@
             </tbody>
         </table>
     </div>
-    <div class="mt-4">
-        {{ $departments->links() }}
     </div>
+
+    @include('partials.table-sort-search')
     
     <script>
         function editDepartment(id, code, description, status) {

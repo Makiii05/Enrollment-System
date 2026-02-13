@@ -20,7 +20,7 @@ class StudentController extends Controller
     {
         $students = Student::with(['department', 'program', 'level', 'contact', 'guardian', 'academicHistory'])
             ->orderBy('created_at', 'desc')
-            ->paginate(15);
+            ->get();
         
         return view('admission.student', compact('students'));
     }
@@ -274,25 +274,8 @@ class StudentController extends Controller
         $students = Student::with(['program', 'level', 'contact', 'guardian', 'academicHistory'])
             ->where('department_id', $departmentId)
             ->orderBy('student_number')
-            ->paginate(15);
+            ->get();
         
         return view('department.students', compact('students'));
-    }
-
-    // department enlistment view
-    public function showEnlistment(Request $request)
-    {
-        $user = $request->user();
-        $departmentId = $user->department_id;
-
-        $academicTermId = $request->query('academic_term_id');
-        $academicTerm = $academicTermId ? AcademicTerm::find($academicTermId) : null;
-
-        $students = Student::with(['program', 'level'])
-            ->where('department_id', $departmentId)
-            ->orderBy('student_number')
-            ->paginate(15);
-        
-        return view('department.enlistment', compact('students', 'academicTerm'));
     }
 }
