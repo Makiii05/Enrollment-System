@@ -31,6 +31,7 @@
                 <div class="p-6 grid grid-cols-12 gap-4">
                     <div class="form-control col-span-4">
                         <input type="text" readonly id="application_no" name="application_no" class="input input-bordered w-full bg-white font-mono font-bold text-green-600" placeholder="Auto-generated" value="" required>
+                        <input type="hidden" name="academic_year" value="2025 - 2026">
                     </div>
                 </div>
             </div>

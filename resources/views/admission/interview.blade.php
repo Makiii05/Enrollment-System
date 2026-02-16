@@ -111,10 +111,9 @@
                 const actionSelected = actionSelect.value !== '';
                 const scheduleSelected = scheduleSelect.value !== '';
                 const anyChecked = Array.from(applicantCheckboxes).some(cb => cb.checked);
-                const isEvaluation = actionSelect.value === 'markForEvaluation';
                 
-                // Proceed Button - requires action, schedule (unless evaluation), and selected applicants
-                const canProceed = actionSelected && anyChecked && (isEvaluation || scheduleSelected);
+                // Proceed Button - requires action, schedule, and selected applicants
+                const canProceed = actionSelected && anyChecked && scheduleSelected;
                 if (canProceed) {
                     proceedBtn.disabled = false;
                     proceedBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
@@ -132,14 +131,6 @@
                 
                 if (!processType) {
                     scheduleSelect.disabled = false;
-                    updateButtonState();
-                    return;
-                }
-
-                // For evaluation, no schedule needed
-                if (processType === 'evaluation') {
-                    scheduleSelect.disabled = true;
-                    scheduleSelect.innerHTML = '<option value="">No schedule required</option>';
                     updateButtonState();
                     return;
                 }

@@ -8,6 +8,7 @@ use App\Models\Program;
 use App\Models\Applicant;
 use App\Models\Schedule;
 use App\Models\Admission;
+use App\Http\Controllers\DashboardController;
 use Carbon\Carbon;
 
 class ApplicantController extends Controller
@@ -104,13 +105,19 @@ class ApplicantController extends Controller
             ->with('is_new', $isNew);
     }
 
-    public function showApplicant(){
+    public function showApplicant(Request $request){
+        $academicYears = DashboardController::getAcademicYearOptions();
+        $selectedYear = $request->query('academic_year', '2025 - 2026');
+
         $applicants = Applicant::with('admission')
+            ->where('academic_year', $selectedYear)
             ->orderBy('created_at', 'desc')
             ->get();
 
         return view('admission.applicant', [
             'applicants' => $applicants,
+            'academicYears' => $academicYears,
+            'selectedYear' => $selectedYear,
         ]);
     }
 

@@ -7,13 +7,22 @@
                 <h1 class="text-2xl font-semibold text-gray-800">Dashboard</h1>
                 <p class="text-sm text-gray-500">Overview of admission statistics</p>
             </div>
-            <a href="{{ route('admission.print.admission.stats') }}" target="_blank" 
-               class="inline-flex items-center gap-2 bg-main-primary hover:bg-main-primary/90 text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.75 9.456V2.25" />
-                </svg>
-                Print Stats
-            </a>
+            <div class="flex items-center gap-3">
+                <!-- Academic Year Selector -->
+                <form method="GET" action="{{ route('admission.dashboard') }}" class="flex items-center gap-2">
+                    <label for="academic_year" class="text-sm font-medium text-gray-600 whitespace-nowrap">Academic Year:</label>
+                    <select name="academic_year" id="academic_year" onchange="this.form.submit()"
+                        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-main-primary focus:border-main-primary">
+                        @foreach($academicYears as $year)
+                            <option value="{{ $year }}" {{ $selectedYear === $year ? 'selected' : '' }}>{{ $year }}</option>
+                        @endforeach
+                    </select>
+                </form>
+                <a href="{{ route('admission.print.admission.stats', ['academic_year' => $selectedYear]) }}" target="_blank" 
+                   class="inline-flex items-center gap-2 bg-main-primary hover:bg-main-primary/90 bg-black text-white px-4 py-2 rounded-lg shadow-sm transition-colors duration-200">
+                    Print Stats
+                </a>
+            </div>
         </div>
 
         <!-- Top Row: Official Students & Total Applicants -->
@@ -50,12 +59,12 @@
         </div>
 
         <!-- Admission Process Row -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
             <!-- Interview Card -->
             <div class="bg-white border-l-4 border-amber-500 rounded-lg p-5 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 uppercase tracking-wide">Interview</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-wide">Interviewee</p>
                         <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($interviewCount) }}</p>
                     </div>
                     <div class="text-gray-300">
@@ -70,7 +79,7 @@
             <div class="bg-white border-l-4 border-violet-500 rounded-lg p-5 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 uppercase tracking-wide">Entrance Exam</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-wide">Examinee</p>
                         <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($examCount) }}</p>
                     </div>
                     <div class="text-gray-300">
@@ -81,11 +90,11 @@
                 </div>
             </div>
 
-            <!-- Final Evaluation Card -->
+            <!-- Evaluation Card -->
             <div class="bg-white border-l-4 border-rose-500 rounded-lg p-5 shadow-sm">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-sm text-gray-500 uppercase tracking-wide">Final Evaluation</p>
+                        <p class="text-sm text-gray-500 uppercase tracking-wide">Evaluatee</p>
                         <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($evaluationCount) }}</p>
                     </div>
                     <div class="text-gray-300">
@@ -95,12 +104,43 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Admitted Card -->
+            <div class="bg-white border-l-4 border-green-500 rounded-lg p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 uppercase tracking-wide">Admitted</p>
+                        <p class="text-3xl font-bold text-gray-800 mt-1">{{ number_format($admittedCount) }}</p>
+                    </div>
+                    <div class="text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variance Card -->
+            <div class="bg-white border-l-4 border-orange-500 rounded-lg p-5 shadow-sm">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 uppercase tracking-wide">Variance</p>
+                        <p class="text-3xl font-bold {{ $variance > 0 ? 'text-red-600' : 'text-green-600' }} mt-1">{{ number_format($variance) }}</p>
+                        <p class="text-xs text-gray-400 mt-1">Applicants − Admitted</p>
+                    </div>
+                    <div class="text-gray-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-10">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Data Table -->
+        <!-- Feeder School Data Table -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200" data-table-wrapper>
             <div class="px-5 py-4 border-b border-gray-200">
-                <h2 class="text-lg font-medium text-gray-800">Feeder School</h2>
+                <h2 class="text-lg font-medium text-gray-800">Feeder School — {{ $selectedYear }}</h2>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full" data-sortable-table>

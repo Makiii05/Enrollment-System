@@ -10,15 +10,57 @@ use App\Models\Admission;
 
 class DashboardController extends Controller
 {
-    public function admissionDashboard()
+    /**
+     * Hardcoded academic year options.
+     */
+    public static function getAcademicYearOptions(): array
     {
-        $officialStudents = Student::count();
-        $totalApplicants = Applicant::count();
-        $interviewCount = Applicant::where('status', 'interview')->count();
-        $examCount = Applicant::where('status', 'exam')->count();
-        $evaluationCount = Applicant::where('status', 'evaluation')->count();
+        return [
+            '2024 - 2025',
+            '2025 - 2026',
+            '2026 - 2027',
+            '2027 - 2028',
+            '2028 - 2029',
+            '2029 - 2030',
+        ];
+    }
 
-        // Get feeder schools with applicant counts by status
+    public function admissionDashboard(Request $request)
+    {
+        $academicYears = self::getAcademicYearOptions();
+        $selectedYear = $request->query('academic_year', '2025 - 2026');
+
+        // Base query: applicants filtered by academic year with their admissions
+        $applicantsForYear = Applicant::where('academic_year', $selectedYear);
+
+        $totalApplicants = (clone $applicantsForYear)->count();
+        $officialStudents = Student::whereHas('applicant', function ($q) use ($selectedYear) {
+            $q->where('academic_year', $selectedYear);
+        })->count();
+
+        // Interviewee: anyone who went through interview (has result passed or failed)
+        $interviewCount = Admission::whereHas('applicant', function ($q) use ($selectedYear) {
+            $q->where('academic_year', $selectedYear);
+        })->whereIn('interview_result', ['passed', 'failed'])->count();
+
+        // Examinee: anyone who went through exam (has result passed or failed)
+        $examCount = Admission::whereHas('applicant', function ($q) use ($selectedYear) {
+            $q->where('academic_year', $selectedYear);
+        })->whereIn('exam_result', ['passed', 'failed'])->count();
+
+        // Evaluatee: anyone who went through evaluation (decision accepted or rejected)
+        $evaluationCount = Admission::whereHas('applicant', function ($q) use ($selectedYear) {
+            $q->where('academic_year', $selectedYear);
+        })->whereIn('decision', ['accepted', 'rejected'])->count();
+
+        // Admitted: decision = accepted
+        $admittedCount = Admission::whereHas('applicant', function ($q) use ($selectedYear) {
+            $q->where('academic_year', $selectedYear);
+        })->where('decision', 'accepted')->count();
+
+        $variance = $totalApplicants - $admittedCount;
+
+        // Feeder schools filtered by academic year
         $feederSchools = Applicant::select(
                 DB::raw("
                     CASE
@@ -34,16 +76,21 @@ class DashboardController extends Controller
                 DB::raw("SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as failed"),
                 DB::raw("SUM(CASE WHEN status = 'admitted' THEN 1 ELSE 0 END) as passed")
             )
+            ->where('academic_year', $selectedYear)
             ->groupBy('last_school_attended')
             ->orderByDesc('total_applicants')
             ->get();
 
         return view('admission.dashboard', compact(
+            'academicYears',
+            'selectedYear',
             'officialStudents',
             'totalApplicants',
             'interviewCount',
             'examCount',
             'evaluationCount',
+            'admittedCount',
+            'variance',
             'feederSchools'
         ));
     }

@@ -58,10 +58,50 @@ class Applicant extends Model
         "lrn",
         "status",
         "reject_reason",
+        "academic_year",
     ];
+
+    protected $appends = [
+        'strand_name',
+        'first_program_choice_name',
+        'second_program_choice_name',
+        'third_program_choice_name',
+    ];
+
+    // ── Relationships ──
 
     public function admission()
     {
         return $this->hasOne(Admission::class);
-    } 
+    }
+
+    // ── Accessors: resolve program IDs to readable names ──
+
+    public function getStrandNameAttribute(): ?string
+    {
+        if (!$this->strand) return null;
+        $program = Program::find($this->strand);
+        return $program ? "{$program->description}" : null;
+    }
+
+    public function getFirstProgramChoiceNameAttribute(): ?string
+    {
+        if (!$this->first_program_choice) return null;
+        $program = Program::find($this->first_program_choice);
+        return $program ? "{$program->description}" : null;
+    }
+
+    public function getSecondProgramChoiceNameAttribute(): ?string
+    {
+        if (!$this->second_program_choice) return null;
+        $program = Program::find($this->second_program_choice);
+        return $program ? "{$program->description}" : null;
+    }
+
+    public function getThirdProgramChoiceNameAttribute(): ?string
+    {
+        if (!$this->third_program_choice) return null;
+        $program = Program::find($this->third_program_choice);
+        return $program ? "{$program->description}" : null;
+    }
 }

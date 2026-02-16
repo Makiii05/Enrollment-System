@@ -82,7 +82,7 @@ class AdmissionProcessController extends Controller
     {
         $validated = $request->validate([
             'action' => 'required|in:reschedule,markForExamination,markForEvaluation',
-            'schedule_id' => 'required_if:action,reschedule,markForExamination|nullable|exists:schedules,id',
+            'schedule_id' => 'required|exists:schedules,id',
             'applicant_ids' => 'required|array|min:1',
             'applicant_ids.*' => 'exists:admissions,id',
         ]);
@@ -151,10 +151,11 @@ class AdmissionProcessController extends Controller
                       ->whereIn('id', $admissionIds);
             })->update(['status' => 'evaluation']);
 
-            // Update admission records with final score from interview
+            // Update admission records with final score from interview and evaluation schedule
             foreach ($admissionIds as $admissionId) {
                 $admission = Admission::find($admissionId);
                 $admission->update([
+                    'evaluation_schedule_id' => $scheduleId,
                     'final_score' => $admission->interview_score ?? 0,
                 ]);
             }
@@ -174,7 +175,7 @@ class AdmissionProcessController extends Controller
     {
         $validated = $request->validate([
             'action' => 'required|in:reschedule,markForInterview,markForEvaluation',
-            'schedule_id' => 'required_if:action,reschedule,markForInterview|nullable|exists:schedules,id',
+            'schedule_id' => 'required|exists:schedules,id',
             'applicant_ids' => 'required|array|min:1',
             'applicant_ids.*' => 'exists:admissions,id',
         ]);
@@ -243,10 +244,11 @@ class AdmissionProcessController extends Controller
                       ->whereIn('id', $admissionIds);
             })->update(['status' => 'evaluation']);
 
-            // Update admission records with final score
+            // Update admission records with final score and evaluation schedule
             foreach ($admissionIds as $admissionId) {
                 $admission = Admission::find($admissionId);
                 $admission->update([
+                    'evaluation_schedule_id' => $scheduleId,
                     'final_score' => ($admission->interview_score ?? 0) + ($admission->exam_score ?? 0),
                 ]);
             }

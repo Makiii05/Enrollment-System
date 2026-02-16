@@ -5,6 +5,17 @@
 
     <div class="flex items-center gap-4 mb-4">
         <h2 class="font-bold text-4xl flex-1">Applicant</h2>
+
+        <!-- Academic Year Selector -->
+        <form method="GET" action="{{ route('admission.applicant') }}" class="flex items-center gap-2">
+            <label for="academic_year" class="text-sm font-medium text-gray-600 whitespace-nowrap">Academic Year:</label>
+            <select name="academic_year" id="academic_year_filter" onchange="this.form.submit()"
+                class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-main-primary focus:border-main-primary">
+                @foreach($academicYears as $year)
+                    <option value="{{ $year }}" {{ $selectedYear === $year ? 'selected' : '' }}>{{ $year }}</option>
+                @endforeach
+            </select>
+        </form>
         
         <form id="deleteForm" action="{{ route('admission.applicant.delete') }}" method="POST" class="inline">
             @csrf

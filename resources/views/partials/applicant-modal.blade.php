@@ -353,10 +353,15 @@
         document.getElementById('modal_level').textContent = applicant.level || '-';
         document.getElementById('modal_student_type').textContent = applicant.student_type || '-';
         document.getElementById('modal_year_level').textContent = applicant.year_level || '-';
-        document.getElementById('modal_strand').textContent = applicant.strand || '-';
-        document.getElementById('modal_first_program_choice').textContent = applicant.first_program_choice || '-';
-        document.getElementById('modal_second_program_choice').textContent = applicant.second_program_choice || '-';
-        document.getElementById('modal_third_program_choice').textContent = applicant.third_program_choice || '-';
+        document.getElementById('modal_strand').textContent = applicant.strand_name || '-';
+        // these program are in id format now, we need to convert it to name before displaying
+
+        document.getElementById('modal_first_program_choice').textContent = applicant.first_program_choice_name || '-';
+        document.getElementById('modal_second_program_choice').textContent = applicant.second_program_choice_name || '-';
+        document.getElementById('modal_third_program_choice').textContent = applicant.third_program_choice_name || '-';
+        // document.getElementById('modal_first_program_choice').textContent = applicant.first_program_choice || '-';
+        // document.getElementById('modal_second_program_choice').textContent = applicant.second_program_choice || '-';
+        // document.getElementById('modal_third_program_choice').textContent = applicant.third_program_choice || '-';
 
         // Admission Process
         document.getElementById('modal_interview_score').textContent = admission?.interview_score || '-';

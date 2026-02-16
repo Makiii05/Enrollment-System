@@ -13,7 +13,7 @@
         <h2 class="font-bold text-4xl">Enlistment</h2>
     </div>
     
-    <div class="mb-4">
+    <div class="mb-4 text-lg gap-1">
         <p><strong>Student No.: </strong>{{ $student->student_number}}</p>
         <p><strong>Name: </strong>{{ $student->last_name }}, {{ $student->first_name }} {{ $student->middle_name }}</p>
         <p><strong>School Year: </strong>{{ $academicTerm->description }}</p>
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex gap-2 mb-4">
+    <div class="flex gap-2 mb-4 text-lg">
         <button class="btn btn-neutral btn-sm" onclick="addSubjectModal.showModal()">Add Subject</button>
         <button class="btn btn-neutral btn-sm" onclick="addSectionModal.showModal()">Add by Section</button>
     </div>
