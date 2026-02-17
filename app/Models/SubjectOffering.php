@@ -15,6 +15,7 @@ class SubjectOffering extends Model
         'program_id',
         'code',
         'description',
+        'class_size',
     ];
 
     public function academicTerm(): BelongsTo

@@ -12,11 +12,24 @@ class Fee extends Model
         "type",
         "month_to_pay",
         "group",
-        "academic_year",
+        "academic_term_id",
         "program_id",
+        "student_id",
     ];
 
     public function program(){
         return $this->belongsTo(Program::class);
+    }
+
+    public function academicTerm(){
+        return $this->belongsTo(AcademicTerm::class);
+    }
+
+    public function student(){
+        return $this->belongsTo(Student::class);
+    }
+
+    public function studentFees(){
+        return $this->hasMany(StudentFee::class);
     }
 }

@@ -23,6 +23,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SubjectOfferingController;
 use App\Http\Controllers\EnlistmentController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\RegistrarStudentController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -77,6 +78,17 @@ Route::prefix('registrar')->name('registrar.')->group(function () {
         Route::post('/prospectuses/{id}/delete', [ProspectusController::class, 'deleteProspectus'])->name('prospectus.delete');
         
         // API routes for dynamic loading
+        Route::get('/students', [RegistrarStudentController::class, 'showStudents'])->name('student');
+        Route::get('/students/{id}/assessment', [RegistrarStudentController::class, 'showAssessment'])->name('student.assessment');
+        Route::get('/students/{id}/print-assessment', [PdfController::class, 'printStudentAssessment'])->name('student.print-assessment');
+        Route::post('/students/{id}/update-level', [RegistrarStudentController::class, 'updateLevel'])->name('student.update-level');
+        Route::get('/api/enlistments/{studentId}/{academicTermId}', [RegistrarStudentController::class, 'getEnlistments'])->name('api.student.enlistments');
+        Route::get('/api/student-fees/{studentId}/{academicTermId}', [RegistrarStudentController::class, 'getStudentFees'])->name('api.student.fees');
+        Route::get('/api/existing-fees/{studentId}/{academicTermId}/{group}', [RegistrarStudentController::class, 'getExistingFees'])->name('api.existing.fees');
+        Route::post('/api/student-fees/{studentId}/create', [RegistrarStudentController::class, 'createStudentFee'])->name('api.student.fees.create');
+        Route::post('/api/student-fees/{studentId}/assign', [RegistrarStudentController::class, 'assignExistingFee'])->name('api.student.fees.assign');
+        Route::delete('/api/student-fees/{studentFeeId}', [RegistrarStudentController::class, 'removeStudentFee'])->name('api.student.fees.remove');
+
         Route::get('/api/levels-by-department/{departmentId}', [ProspectusController::class, 'getLevelsByDepartment'])->name('api.levels');
         Route::get('/api/curricula-by-department/{departmentId}', [ProspectusController::class, 'getCurriculaByDepartment'])->name('api.curricula');
         Route::get('/api/prospectuses', [ProspectusController::class, 'getProspectusesApi'])->name('api.prospectuses');
@@ -95,6 +107,8 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
         Route::post('/fee', [FeeController::class, 'createFee'])->name('fee.create');
         Route::post('/fee/{id}/update', [FeeController::class, 'updateFee'])->name('fee.update');
         Route::post('/fee/{id}/delete', [FeeController::class, 'deleteFee'])->name('fee.delete');
+
+        Route::get('/api/academic-terms', [FeeController::class, 'getAcademicTermsByProgram'])->name('api.academic-terms');
     });
 });
 
@@ -172,6 +186,7 @@ Route::prefix('department')->name('department.')->group(function () {
         Route::post('/subject-offering/search', [SubjectOfferingController::class, 'searchOffering'])->name('subject_offering.search');
         Route::post('/subject-offering/add', [SubjectOfferingController::class, 'addSubjectOffering'])->name('subject_offering.add');
         Route::delete('/subject-offering/{id}/remove', [SubjectOfferingController::class, 'removeSubjectOffering'])->name('subject_offering.remove');
+        Route::get('/print-subject-offerings', [PdfController::class, 'printSubjectOfferings'])->name('print.subject_offerings');
         Route::get('/api/curricula-by-department/{departmentId}', [SubjectOfferingController::class, 'getCurriculaByDepartment'])->name('api.curricula');
         Route::get('/api/subject-offering/{academicTermId}/{departmentId}', [SubjectOfferingController::class, 'getSubjectOffering'])->name('api.subject_offering');
         Route::get('/api/subjects/search', [SubjectOfferingController::class, 'searchSubjects'])->name('api.subjects.search');

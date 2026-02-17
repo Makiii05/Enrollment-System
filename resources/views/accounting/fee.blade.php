@@ -1,5 +1,7 @@
 <x-accounting_sidebar>
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <div class="m-4 font-bold text-4xl">
         <h2>Fee List</h2>
     </div>
@@ -7,19 +9,14 @@
     <div class="m-4 flex">
         <form action="{{ route('accounting.fee.search') }}" method="POST" class="grow flex gap-2 items-end">
             @csrf
-            <select name="program" class="select select-bordered" required>
+            <select name="program" id="programSelect" class="select select-bordered" required>
                 <option value="">--Select Program--</option>
                 @foreach ($programs as $program)
                 <option value="{{ $program->id }}" @if(isset($old_program) && $old_program == $program->id) selected @endif>{{ $program->description }}</option>
                 @endforeach
             </select>
-            <select name="academic_year" class="select select-bordered" required>
-                <option value="">--Select Academic Year--</option>
-                <option value="2025 - 2026" @if(isset($old_academic_year) && $old_academic_year == "2025 - 2026") selected @endif>2025 - 2026</option>
-                <option value="2026 - 2027" @if(isset($old_academic_year) && $old_academic_year == "2026 - 2027") selected @endif>2026 - 2027</option>
-                <option value="2027 - 2028" @if(isset($old_academic_year) && $old_academic_year == "2027 - 2028") selected @endif>2027 - 2028</option>
-                <option value="2028 - 2029" @if(isset($old_academic_year) && $old_academic_year == "2028 - 2029") selected @endif>2028 - 2029</option>
-                <option value="2029 - 2030" @if(isset($old_academic_year) && $old_academic_year == "2029 - 2030") selected @endif>2029 - 2030</option>
+            <select name="academic_term_id" id="academicTermSelect" class="select select-bordered" required>
+                <option value="">--Select Academic Term--</option>
             </select>
             <button type="submit" class="btn bg-white">Search</button>
         </form>
@@ -32,7 +29,7 @@
             <form action="{{ route('accounting.fee.create') }}" method="POST" class="mb-4">
                 @csrf
                 <input type="hidden" name="program_id" value="{{ isset($old_program) ? $old_program : '' }}">
-                <input type="hidden" name="academic_year" value="{{ isset($old_academic_year) ? $old_academic_year : '' }}">
+                <input type="hidden" name="academic_term_id" value="{{ isset($old_academic_term_id) ? $old_academic_term_id : '' }}">
                 <input type="hidden" name="group" value="major">
                 <input type="hidden" name="type" value="">
                 <input type="hidden" name="months_to_pay" value="">
@@ -84,13 +81,14 @@
                 </table>
             </div>
             </div>
+        </div>
 
         <div class="mb-8 flex flex-col bg-white shadow p-4">
             <h3 class="text-lg font-bold mb-4">Other Fees</h3>
             <form action="{{ route('accounting.fee.create') }}" method="POST" class="mb-4">
                 @csrf
                 <input type="hidden" name="program_id" value="{{ isset($old_program) ? $old_program : '' }}">
-                <input type="hidden" name="academic_year" value="{{ isset($old_academic_year) ? $old_academic_year : '' }}">
+                <input type="hidden" name="academic_term_id" value="{{ isset($old_academic_term_id) ? $old_academic_term_id : '' }}">
                 <input type="hidden" name="group" value="other">
                 <input type="hidden" name="months_to_pay" value="">
 
@@ -149,13 +147,14 @@
                 </table>
             </div>
             </div>
+        </div>
 
         <div class="mb-8 flex flex-col bg-white shadow p-4">
             <h3 class="text-lg font-bold mb-4">Additional Fees</h3>
             <form action="{{ route('accounting.fee.create') }}" method="POST" class="mb-4">
                 @csrf
                 <input type="hidden" name="program_id" value="{{ isset($old_program) ? $old_program : '' }}">
-                <input type="hidden" name="academic_year" value="{{ isset($old_academic_year) ? $old_academic_year : '' }}">
+                <input type="hidden" name="academic_term_id" value="{{ isset($old_academic_term_id) ? $old_academic_term_id : '' }}">
                 <input type="hidden" name="group" value="additional">
 
                 <div class="form-control w-75 mb-3">
@@ -221,6 +220,7 @@
                 </table>
             </div>
             </div>
+        </div>
     </div>
     @endif
 
@@ -238,7 +238,7 @@
                 <form action="{{ route('accounting.fee.update', $fee->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <input type="hidden" name="program" value="{{ $old_program }}">
-                    <input type="hidden" name="academic_year" value="{{ $old_academic_year }}">
+                    <input type="hidden" name="academic_term_id" value="{{ $old_academic_term_id }}">
                     <input type="hidden" name="group" value="major">
                     <input type="hidden" name="type" value="">
                     <input type="hidden" name="months_to_pay" value="">
@@ -279,7 +279,7 @@
                 <form action="{{ route('accounting.fee.update', $fee->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <input type="hidden" name="program" value="{{ $old_program }}">
-                    <input type="hidden" name="academic_year" value="{{ $old_academic_year }}">
+                    <input type="hidden" name="academic_term_id" value="{{ $old_academic_term_id }}">
                     <input type="hidden" name="group" value="other">
                     <input type="hidden" name="months_to_pay" value="">
                     
@@ -326,7 +326,7 @@
                 <form action="{{ route('accounting.fee.update', $fee->id) }}" method="POST" class="space-y-4">
                     @csrf
                     <input type="hidden" name="program" value="{{ $old_program }}">
-                    <input type="hidden" name="academic_year" value="{{ $old_academic_year }}">
+                    <input type="hidden" name="academic_term_id" value="{{ $old_academic_term_id }}">
                     <input type="hidden" name="group" value="additional">
                     
                     <div class="form-control">
@@ -366,4 +366,45 @@
         </dialog>
         @endforeach
     @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const programSelect = document.getElementById('programSelect');
+            const academicTermSelect = document.getElementById('academicTermSelect');
+            const oldAcademicTermId = "{{ isset($old_academic_term_id) ? $old_academic_term_id : '' }}";
+
+            function loadAcademicTerms(programId) {
+                academicTermSelect.innerHTML = '<option value="">--Select Academic Term--</option>';
+                if (!programId) return;
+
+                fetch(`{{ route('accounting.api.academic-terms') }}?program_id=${programId}`, {
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    }
+                })
+                .then(response => response.json())
+                .then(terms => {
+                    terms.forEach(term => {
+                        const option = document.createElement('option');
+                        option.value = term.id;
+                        option.textContent = `${term.description}`;
+                        if (oldAcademicTermId && oldAcademicTermId == term.id) {
+                            option.selected = true;
+                        }
+                        academicTermSelect.appendChild(option);
+                    });
+                });
+            }
+
+            programSelect.addEventListener('change', function() {
+                loadAcademicTerms(this.value);
+            });
+
+            // Load on page load if program is already selected
+            if (programSelect.value) {
+                loadAcademicTerms(programSelect.value);
+            }
+        });
+    </script>
 </x-accounting_sidebar>

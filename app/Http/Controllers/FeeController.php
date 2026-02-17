@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Program;
 use App\Models\Fee;
+use App\Models\AcademicTerm;
 
 class FeeController extends Controller
 {
@@ -16,19 +17,30 @@ class FeeController extends Controller
         ]);
     }
 
+    public function getAcademicTermsByProgram(Request $request) {
+        $program = Program::find($request->program_id);
+        if (!$program) {
+            return response()->json([]);
+        }
+        $terms = AcademicTerm::where('department_id', $program->department_id)
+            ->orderBy('created_at')
+            ->get();
+        return response()->json($terms);
+    }
+
     public function searchFee(Request $request) {
         // validate
         $request->validate([
             'program' => 'required|string|max:255',
-            'academic_year' => 'required|string|max:255',
+            'academic_term_id' => 'required|exists:academic_terms,id',
         ]);
         // assign
         $program = $request->program;
-        $academic_year = $request->academic_year;
+        $academic_term_id = $request->academic_term_id;
 
-        $major_fees = Fee::where('group','major')->where('academic_year',$academic_year)->where('program_id',$program)->get();
-        $other_fees = Fee::where('group','other')->where('academic_year',$academic_year)->where('program_id',$program)->get();
-        $additional_fees = Fee::where('group','additional')->where('academic_year',$academic_year)->where('program_id',$program)->get();
+        $major_fees = Fee::where('group','major')->where('academic_term_id',$academic_term_id)->where('program_id',$program)->get();
+        $other_fees = Fee::where('group','other')->where('academic_term_id',$academic_term_id)->where('program_id',$program)->get();
+        $additional_fees = Fee::where('group','additional')->where('academic_term_id',$academic_term_id)->where('program_id',$program)->get();
         $programs = Program::where('status', 'active')->orderBy("created_at", "asc")->get();
 
         return view('accounting.fee', [
@@ -37,7 +49,7 @@ class FeeController extends Controller
             'other_fees' => $other_fees,
             'additional_fees' => $additional_fees,
             'old_program' => $program,
-            'old_academic_year' => $academic_year,
+            'old_academic_term_id' => $academic_term_id,
         ]);
     }
 
@@ -49,7 +61,7 @@ class FeeController extends Controller
             'type' => 'nullable|string|max:255',
             'months_to_pay' => 'nullable|numeric',
             'group' => 'required|string|max:255',
-            'academic_year' => 'required|string|max:255',
+            'academic_term_id' => 'required|exists:academic_terms,id',
             'program_id' => 'required|exists:programs,id',
         ]);
 
@@ -59,13 +71,13 @@ class FeeController extends Controller
             'type' => $validated['type'],
             'month_to_pay' => $validated['months_to_pay'],
             'group' => $validated['group'],
-            'academic_year' => $validated['academic_year'],
+            'academic_term_id' => $validated['academic_term_id'],
             'program_id' => $validated['program_id'],
         ]);
 
         return redirect()->route('accounting.fee.search', [
             'program' => $validated['program_id'],
-            'academic_year' => $validated['academic_year'],
+            'academic_term_id' => $validated['academic_term_id'],
         ]);
     }
 
@@ -80,7 +92,7 @@ class FeeController extends Controller
             'type' => 'nullable|string|max:255',
             'months_to_pay' => 'nullable|numeric',
             'group' => 'required|string|max:255',
-            'academic_year' => 'required|string|max:255',
+            'academic_term_id' => 'required|exists:academic_terms,id',
             'program' => 'required|exists:programs,id',
         ]);
 
@@ -91,13 +103,13 @@ class FeeController extends Controller
             'type' => $validated['type'],
             'month_to_pay' => $validated['months_to_pay'],
             'group' => $validated['group'],
-            'academic_year' => $validated['academic_year'],
+            'academic_term_id' => $validated['academic_term_id'],
             'program_id' => $validated['program'],
         ]);
 
         return redirect()->route('accounting.fee.search', [
             'program' => $validated['program'],
-            'academic_year' => $validated['academic_year'],
+            'academic_term_id' => $validated['academic_term_id'],
         ])->with('success', 'Fee updated successfully.');
     }
 
@@ -105,16 +117,16 @@ class FeeController extends Controller
         // Find the fee or fail
         $fee = Fee::findOrFail($id);
 
-        // Store program and academic year before deleting
+        // Store program and academic term before deleting
         $program_id = $fee->program_id;
-        $academic_year = $fee->academic_year;
+        $academic_term_id = $fee->academic_term_id;
 
         // Delete the fee
         $fee->delete();
 
         return redirect()->route('accounting.fee.search', [
             'program' => $program_id,
-            'academic_year' => $academic_year,
+            'academic_term_id' => $academic_term_id,
         ])->with('success', 'Fee deleted successfully.');
     }
 }

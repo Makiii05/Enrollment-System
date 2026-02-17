@@ -121,8 +121,13 @@
         <!--SUBJECT OFFERING TABLE-->
         <div class="overflow-x-auto shadow w-1/2 bg-white p-2">
             <div class="bg-white" data-table-wrapper>
-                <div class="p-4">
+                <div class="p-4 flex items-center justify-between">
                     <h3 class="font-semibold text-lg">Subject Offerings</h3>
+                    @if(isset($academicTerm) && isset($subjectOfferings) && $subjectOfferings->count() > 0)
+                        <a href="{{ route('department.print.subject_offerings', ['academic_term_id' => $academicTerm->id]) }}" target="_blank" class="btn btn-sm btn-neutral">
+                            Print PDF
+                        </a>
+                    @endif
                 </div>
                 <table class="table table-zebra" data-sortable-table>
                     <thead>
@@ -130,6 +135,7 @@
                             <th>Code</th>
                             <th>Description</th>
                             <th>Units</th>
+                            <th>Class Size</th>
                             <th data-no-sort>Action</th>
                         </tr>
                     </thead>
@@ -140,6 +146,7 @@
                                 <td>{{ $offering->code }}</td>
                                 <td>{{ $offering->description }}</td>
                                 <td>{{ $offering->subject->unit ?? '-' }}</td>
+                                <td class="{{ $offering->enlistments->count() > $offering->class_size ? 'text-red-600' : 'text-green-600' }}">{{ $offering->enlistments->count() }}/{{ $offering->class_size }}</td>
                                 <td>
                                     <button type="button" class="btn btn-sm btn-ghost text-red-600 font-semibold" onclick="removeOffering({{ $offering->id }})">Remove</button>
                                 </td>
@@ -147,7 +154,7 @@
                             @endforeach
                         @else
                             <tr id="no-offerings-row">
-                                <td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
+                                <td colspan="5" class="text-center text-gray-500 py-8">No subject offerings yet.</td>
                             </tr>
                         @endif
                     </tbody>
@@ -315,9 +322,10 @@
             <td>${offering.code}</td>
             <td>${offering.description}</td>
             <td>${offering.subject?.unit ?? '-'}</td>
+            <td class="{{ $offering->enlistments->count() > $offering->class_size ? 'text-red-600' : 'text-green-600' }}">{{ $offering->enlistments->count() }}/{{ $offering->class_size }}</td>
             <td><button type="button" class="btn btn-sm btn-ghost text-red-600 font-semibold" onclick="removeOffering(${offering.id})">Remove</button></td>
         `;
-        tbody.appendChild(row);
+        tbody.prepend(row);
     }
 
     // Load subject offerings by academic term (for refresh)
@@ -335,7 +343,7 @@
             if (offerings.length > 0) {
                 offerings.forEach(offering => appendOfferingRow(offering));
             } else {
-                tbody.innerHTML = '<tr id="no-offerings-row"><td colspan="4" class="text-center text-gray-500 py-8">No subject offerings yet.</td></tr>';
+                tbody.innerHTML = '<tr id="no-offerings-row"><td colspan="5" class="text-center text-gray-500 py-8">No subject offerings yet.</td></tr>';
             }
         } catch (error) {
             console.error('Error loading subject offerings:', error);

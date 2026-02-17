@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('program_id')->constrained('programs')->onDelete('cascade');
             $table->string('code');
             $table->string('description');
+            $table->integer('class_size')->default(40);
             $table->timestamps();
         });
     }

@@ -7,6 +7,12 @@ use App\Models\Applicant;
 use App\Models\Admission;
 use App\Models\Level;
 use App\Models\Schedule;
+use App\Models\SubjectOffering;
+use App\Models\AcademicTerm;
+use App\Models\Department;
+use App\Models\Student;
+use App\Models\Enlistment;
+use App\Models\StudentFee;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 
@@ -148,5 +154,66 @@ class PdfController extends Controller
         $pdf = Pdf::loadView('pdf.print_schedule_applicants', compact('schedule', 'applicants'));
         
         return $pdf->stream('schedule_applicants_' . date('Y-m-d') . '.pdf');
+    }
+
+    public function printSubjectOfferings(Request $request)
+    {
+        $departmentId = $request->user()->department_id;
+        $academicTermId = $request->query('academic_term_id');
+
+        $academicTerm = AcademicTerm::findOrFail($academicTermId);
+        $department = Department::findOrFail($departmentId);
+
+        $subjectOfferings = SubjectOffering::where('academic_term_id', $academicTermId)
+            ->where('department_id', $departmentId)
+            ->with('subject')
+            ->withCount('enlistments')
+            ->orderBy('code')
+            ->get();
+
+        $pdf = Pdf::loadView('pdf.print_subject_offerings', compact('subjectOfferings', 'academicTerm', 'department'))
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->stream('subject_offerings_' . date('Y-m-d') . '.pdf');
+    }
+
+    public function printStudentAssessment(Request $request, $studentId)
+    {
+        $academicTermId = $request->query('academic_term_id');
+
+        $student = Student::with(['department', 'program', 'level', 'contact'])->findOrFail($studentId);
+        $academicTerm = $academicTermId ? AcademicTerm::find($academicTermId) : null;
+
+        // Get enlistments
+        $enlistments = collect();
+        if ($academicTermId) {
+            $enlistments = Enlistment::with(['subjectOffering.subject'])
+                ->where('student_id', $studentId)
+                ->where('academic_term_id', $academicTermId)
+                ->get();
+        }
+
+        // Get fees grouped
+        $fees = ['major' => collect(), 'other' => collect(), 'additional' => collect()];
+        if ($academicTermId) {
+            $studentFees = StudentFee::with(['fee'])
+                ->where('student_id', $studentId)
+                ->where('academic_term_id', $academicTermId)
+                ->get();
+
+            foreach ($studentFees as $sf) {
+                $fee = $sf->fee;
+                if ($fee) {
+                    $group = $fee->group ?? 'other';
+                    if (isset($fees[$group])) {
+                        $fees[$group]->push($fee);
+                    }
+                }
+            }
+        }
+
+        $pdf = Pdf::loadView('pdf.print_student_assessment', compact('student', 'academicTerm', 'enlistments', 'fees'));
+
+        return $pdf->stream('student_assessment_' . $student->student_number . '_' . date('Y-m-d') . '.pdf');
     }
 }
