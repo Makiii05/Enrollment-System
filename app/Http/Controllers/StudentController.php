@@ -18,11 +18,48 @@ class StudentController extends Controller
 {
     public function showStudent()
     {
+        // Don't load students on initial page load - they will be fetched via API search
+        return view('admission.student');
+    }
+
+    public function searchStudents(Request $request)
+    {
+        $search = $request->input('search', '');
+        
+        if (empty($search)) {
+            return response()->json(['data' => []]);
+        }
+        
         $students = Student::with(['department', 'program', 'level', 'contact', 'guardian', 'academicHistory'])
+            ->where(function ($query) use ($search) {
+                $query->where('student_number', 'like', '%' . $search . '%')
+                    ->orWhere('lrn', 'like', '%' . $search . '%')
+                    ->orWhere('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('middle_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('sex', 'like', '%' . $search . '%')
+                    ->orWhere('citizenship', 'like', '%' . $search . '%')
+                    ->orWhere('religion', 'like', '%' . $search . '%')
+                    ->orWhere('place_of_birth', 'like', '%' . $search . '%')
+                    ->orWhere('civil_status', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%')
+                    ->orWhereHas('department', function ($q) use ($search) {
+                        $q->where('code', 'like', '%' . $search . '%')
+                          ->orWhere('description', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('program', function ($q) use ($search) {
+                        $q->where('code', 'like', '%' . $search . '%')
+                          ->orWhere('description', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('level', function ($q) use ($search) {
+                        $q->where('code', 'like', '%' . $search . '%')
+                          ->orWhere('description', 'like', '%' . $search . '%');
+                    });
+            })
             ->orderBy('created_at', 'desc')
             ->get();
         
-        return view('admission.student', compact('students'));
+        return response()->json(['data' => $students]);
     }
 
     public function editStudent(Request $request, $id)
@@ -268,14 +305,46 @@ class StudentController extends Controller
     // department students view
     public function showDepartmentStudents(Request $request)
     {
+        // Don't load students on initial page load - they will be fetched via API search
+        return view('department.students');
+    }
+
+    public function searchDepartmentStudents(Request $request)
+    {
         $user = $request->user();
         $departmentId = $user->department_id;
-
-        $students = Student::with(['program', 'level', 'contact', 'guardian', 'academicHistory'])
+        $search = $request->input('search', '');
+        
+        if (empty($search)) {
+            return response()->json(['data' => []]);
+        }
+        
+        $students = Student::with(['department', 'program', 'level', 'contact', 'guardian', 'academicHistory'])
             ->where('department_id', $departmentId)
+            ->where(function ($query) use ($search) {
+                $query->where('student_number', 'like', '%' . $search . '%')
+                    ->orWhere('lrn', 'like', '%' . $search . '%')
+                    ->orWhere('first_name', 'like', '%' . $search . '%')
+                    ->orWhere('middle_name', 'like', '%' . $search . '%')
+                    ->orWhere('last_name', 'like', '%' . $search . '%')
+                    ->orWhere('sex', 'like', '%' . $search . '%')
+                    ->orWhere('citizenship', 'like', '%' . $search . '%')
+                    ->orWhere('religion', 'like', '%' . $search . '%')
+                    ->orWhere('place_of_birth', 'like', '%' . $search . '%')
+                    ->orWhere('civil_status', 'like', '%' . $search . '%')
+                    ->orWhere('status', 'like', '%' . $search . '%')
+                    ->orWhereHas('program', function ($q) use ($search) {
+                        $q->where('code', 'like', '%' . $search . '%')
+                          ->orWhere('description', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('level', function ($q) use ($search) {
+                        $q->where('code', 'like', '%' . $search . '%')
+                          ->orWhere('description', 'like', '%' . $search . '%');
+                    });
+            })
             ->orderBy('student_number')
             ->get();
         
-        return view('department.students', compact('students'));
+        return response()->json(['data' => $students]);
     }
 }

@@ -79,6 +79,7 @@ Route::prefix('registrar')->name('registrar.')->group(function () {
         
         // API routes for dynamic loading
         Route::get('/students', [RegistrarStudentController::class, 'showStudents'])->name('student');
+        Route::get('/api/students/search', [RegistrarStudentController::class, 'searchStudents'])->name('api.students.search');
         Route::get('/students/{id}/assessment', [RegistrarStudentController::class, 'showAssessment'])->name('student.assessment');
         Route::get('/students/{id}/print-assessment', [PdfController::class, 'printStudentAssessment'])->name('student.print-assessment');
         Route::post('/students/{id}/update-level', [RegistrarStudentController::class, 'updateLevel'])->name('student.update-level');
@@ -145,6 +146,7 @@ Route::prefix('admission')->name('admission.')->group(function () {
         Route::post('/evaluation/admit', [AdmissionProcessController::class, 'admitStudents'])->name('evaluation.admit');
         
         Route::get('/student', [StudentController::class, 'showStudent'])->name('student');
+        Route::get('/api/students/search', [StudentController::class, 'searchStudents'])->name('api.students.search');
         Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
         Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
         
@@ -167,6 +169,7 @@ Route::prefix('department')->name('department.')->group(function () {
         Route::get('/dashboard', [DepartmentAuthController::class, 'showDashboard'])->name('dashboard');
         
         Route::get('/student', [StudentController::class, 'showDepartmentStudents'])->name('student');
+        Route::get('/api/students/search', [StudentController::class, 'searchDepartmentStudents'])->name('api.students.search');
         Route::get('/student/{id}/edit', [StudentController::class, 'editStudent'])->name('student.edit');
         Route::post('/student/{id}/update', [StudentController::class, 'updateStudent'])->name('student.update');
 
