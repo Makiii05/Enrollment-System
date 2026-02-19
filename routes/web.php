@@ -24,6 +24,8 @@ use App\Http\Controllers\SubjectOfferingController;
 use App\Http\Controllers\EnlistmentController;
 use App\Http\Controllers\PdfController;
 use App\Http\Controllers\RegistrarStudentController;
+use App\Http\Controllers\CashierController;
+use App\Http\Controllers\PaymentDetailsController;
 
 Route::get('/', function () {return view('index');})->name('index');
 
@@ -110,6 +112,34 @@ Route::prefix('accounting')->name('accounting.')->group(function () {
         Route::post('/fee/{id}/delete', [FeeController::class, 'deleteFee'])->name('fee.delete');
 
         Route::get('/api/academic-terms', [FeeController::class, 'getAcademicTermsByProgram'])->name('api.academic-terms');
+
+        // Cashier routes
+        Route::get('/cashier', [CashierController::class, 'showCashier'])->name('cashier');
+        Route::get('/api/students/search', [CashierController::class, 'searchStudents'])->name('api.students.search');
+        Route::get('/payment/{id}', [CashierController::class, 'showPayment'])->name('payment');
+        Route::get('/api/student-fees/{studentId}/{academicTermId}', [CashierController::class, 'getStudentFees'])->name('api.student.fees');
+        Route::get('/api/enlistments/{studentId}/{academicTermId}', [CashierController::class, 'getEnlistments'])->name('api.enlistments');
+        
+        // Transaction routes
+        Route::get('/api/transactions/{studentId}/{academicTermId}', [CashierController::class, 'getTransactions'])->name('api.transactions');
+        Route::post('/api/transactions/create', [CashierController::class, 'createTransaction'])->name('api.transactions.create');
+        Route::delete('/api/transactions/{id}', [CashierController::class, 'deleteTransaction'])->name('api.transactions.delete');
+        Route::get('/api/next-or-number', [CashierController::class, 'getNextOrNumber'])->name('api.next-or-number');
+
+        // Print routes
+        Route::get('/print/daily-transactions', [CashierController::class, 'printDailyTransactions'])->name('print.daily-transactions');
+        Route::get('/print/sales-invoice/{id}', [CashierController::class, 'printSalesInvoice'])->name('print.sales-invoice');
+
+        // Payment Details routes
+        Route::get('/payment-details', [PaymentDetailsController::class, 'index'])->name('payment_details');
+        Route::post('/payment-accounts', [PaymentDetailsController::class, 'storePaymentAccount'])->name('payment_accounts.store');
+        Route::post('/payment-accounts/{id}/update', [PaymentDetailsController::class, 'updatePaymentAccount'])->name('payment_accounts.update');
+        Route::post('/payment-accounts/{id}/delete', [PaymentDetailsController::class, 'deletePaymentAccount'])->name('payment_accounts.delete');
+        Route::post('/payment-types', [PaymentDetailsController::class, 'storePaymentType'])->name('payment_types.store');
+        Route::post('/payment-types/{id}/update', [PaymentDetailsController::class, 'updatePaymentType'])->name('payment_types.update');
+        Route::post('/payment-types/{id}/delete', [PaymentDetailsController::class, 'deletePaymentType'])->name('payment_types.delete');
+        Route::get('/api/payment-accounts', [PaymentDetailsController::class, 'getPaymentAccounts'])->name('api.payment_accounts');
+        Route::get('/api/payment-types', [PaymentDetailsController::class, 'getPaymentTypes'])->name('api.payment_types');
     });
 });
 

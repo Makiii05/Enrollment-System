@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ asset('images/logo.png') }}" type="image/x-icon">
     <title>Admin Login</title>
     @vite('resources/css/app.css')
 </head>
@@ -11,12 +12,13 @@
     <div class="w-full max-w-sm">
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
+                <div class="flex flex-col items-center mb-4">
+                    <img src="{{ asset('images/logo.png') }}" alt="Logo" class="w-16 h-16 mb-2">
+                    <h1 class="text-lg font-bold text-gray-700">{{ env('APP_NAME') }}</h1>
+                </div>
                 <h2 class="card-title justify-center text-2xl font-bold">
                     Admin Login
                 </h2>
-                <p class="text-center text-sm text-gray-500 mb-4">
-                    Sign in to continue
-                </p>
                 <form class="space-y-4" method="POST" action="{{ route('admin.login.submit') }}">
                     @csrf
                     <div class="form-control">
