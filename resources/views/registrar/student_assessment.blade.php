@@ -236,6 +236,27 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Assessment History Table -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h3 class="font-semibold text-lg mb-4">Printing of Assessment History</h3>
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra table-sm">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Term</th>
+                                <th class="w-32">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assessmentHistoryBody">
+                            <tr>
+                                <td colspan="3" class="text-center text-gray-500 py-4">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -304,6 +325,7 @@
         const createFeeApiUrl = '{{ url("/registrar/api/student-fees") }}/' + studentId + '/create';
         const assignFeeApiUrl = '{{ url("/registrar/api/student-fees") }}/' + studentId + '/assign';
         const removeFeeApiUrl = '{{ url("/registrar/api/student-fees") }}';
+        const assessmentHistoriesApiUrl = '{{ url("/registrar/api/assessment-histories") }}';
         const csrfToken = '{{ csrf_token() }}';
         const printBaseUrl = '{{ route('registrar.student.print-assessment', $student->id) }}';
 
@@ -325,6 +347,8 @@
             }
             const link = document.getElementById('printAssessmentLink');
             link.href = printBaseUrl + '?academic_term_id=' + termId;
+            // Reload assessment history after a short delay (to allow the PDF to be generated)
+            setTimeout(() => loadAssessmentHistories(), 1000);
             return true;
         }
 
@@ -762,6 +786,76 @@
                 btn.textContent = 'Update';
             }
         }
+
+        // ── Assessment History ─────────────────────────────────
+        async function loadAssessmentHistories() {
+            const tbody = document.getElementById('assessmentHistoryBody');
+
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-4"><span class="loading loading-spinner loading-sm"></span> Loading...</td></tr>';
+
+            try {
+                const response = await fetch(`${assessmentHistoriesApiUrl}/${studentId}`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                const result = await response.json();
+
+                tbody.innerHTML = '';
+
+                if (result.data && result.data.length > 0) {
+                    result.data.forEach(history => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${history.date_printed}</td>
+                            <td>${history.academic_term}</td>
+                            <td>
+                                <div class="flex gap-1">
+                                    <button class="btn btn-ghost btn-sm" onclick="reprintAssessment(${history.academic_term_id})" title="Reprint">
+                                        print
+                                    </button>
+                                    <button class="btn btn-ghost btn-sm text-error" onclick="deleteAssessmentHistory(${history.id})" title="Delete">
+                                        delete
+                                    </button>
+                                </div>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-gray-500 py-4">No assessment history records.</td></tr>';
+                }
+            } catch (error) {
+                console.error('Error loading assessment histories:', error);
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-red-500 py-4">Error loading assessment history.</td></tr>';
+            }
+        }
+
+        function reprintAssessment(academicTermId) {
+            window.open(printBaseUrl + '?academic_term_id=' + academicTermId + '&reprint=1', '_blank');
+        }
+
+        async function deleteAssessmentHistory(historyId) {
+            if (!confirm('Are you sure you want to delete this assessment history record?')) return;
+
+            try {
+                const response = await fetch(`${assessmentHistoriesApiUrl}/${historyId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Failed to delete');
+
+                loadAssessmentHistories();
+            } catch (error) {
+                console.error('Error deleting assessment history:', error);
+                alert('Failed to delete assessment history.');
+            }
+        }
+
+        // Load assessment histories on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            loadAssessmentHistories();
+        });
     </script>
 
 </x-registrar_sidebar>

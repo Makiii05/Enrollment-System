@@ -13,6 +13,10 @@ use App\Models\Department;
 use App\Models\Student;
 use App\Models\Enlistment;
 use App\Models\StudentFee;
+use App\Models\AssessmentHistory;
+use App\Models\AssessmentHistoryEnlistment;
+use App\Models\AssessmentHistoryFee;
+use App\Models\AssessmentHistoryStudent;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 
@@ -208,6 +212,48 @@ class PdfController extends Controller
                     if (isset($fees[$group])) {
                         $fees[$group]->push($fee);
                     }
+                }
+            }
+        }
+
+        // Create assessment history record (only for new prints, not reprints)
+        $isReprint = $request->query('reprint', false);
+        if ($academicTermId && !$isReprint) {
+            $assessmentHistory = AssessmentHistory::create([
+                'student_id' => $studentId,
+                'academic_term_id' => $academicTermId,
+                'date_printed' => now(),
+            ]);
+
+            // Save student info snapshot
+            AssessmentHistoryStudent::create([
+                'assessment_history_id' => $assessmentHistory->id,
+                'student_number' => $student->student_number,
+                'name' => "{$student->last_name}, {$student->first_name} {$student->middle_name}",
+                'year_level' => $student->level->description ?? '-',
+                'program' => $student->program->code ?? '-',
+                'department' => $student->department->code ?? '-',
+            ]);
+
+            // Save enlistment snapshot
+            foreach ($enlistments as $enlistment) {
+                AssessmentHistoryEnlistment::create([
+                    'assessment_history_id' => $assessmentHistory->id,
+                    'code' => $enlistment->subjectOffering->code ?? '-',
+                    'description' => $enlistment->subjectOffering->description ?? '-',
+                    'units' => $enlistment->subjectOffering->subject->unit ?? 0,
+                ]);
+            }
+
+            // Save fees snapshot
+            foreach ($fees as $feeType => $feeGroup) {
+                foreach ($feeGroup as $fee) {
+                    AssessmentHistoryFee::create([
+                        'assessment_history_id' => $assessmentHistory->id,
+                        'type' => $feeType,
+                        'description' => $fee->description,
+                        'amount' => $fee->amount,
+                    ]);
                 }
             }
         }

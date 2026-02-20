@@ -9,6 +9,7 @@ use App\Models\AcademicTerm;
 use App\Models\Enlistment;
 use App\Models\Fee;
 use App\Models\StudentFee;
+use App\Models\AssessmentHistory;
 
 class RegistrarStudentController extends Controller
 {
@@ -240,5 +241,39 @@ class RegistrarStudentController extends Controller
         $sf->delete();
 
         return response()->json(['success' => true, 'message' => 'Fee removed.']);
+    }
+
+    /**
+     * Get all assessment histories for a student.
+     */
+    public function getAssessmentHistories($studentId)
+    {
+        $histories = AssessmentHistory::with(['academicTerm'])
+            ->where('student_id', $studentId)
+            ->orderBy('date_printed', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $histories->map(function ($history) {
+                return [
+                    'id' => $history->id,
+                    'date_printed' => $history->date_printed->format('M d, Y h:i A'),
+                    'academic_term' => $history->academicTerm->description ?? '-',
+                    'academic_term_id' => $history->academic_term_id,
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Delete an assessment history record.
+     */
+    public function deleteAssessmentHistory($id)
+    {
+        $history = AssessmentHistory::findOrFail($id);
+        $history->delete();
+
+        return response()->json(['success' => true, 'message' => 'Assessment history deleted.']);
     }
 }

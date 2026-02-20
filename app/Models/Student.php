@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 // Student Model
@@ -66,5 +67,10 @@ class Student extends Model
     public function academicHistory(): HasOne
     {
         return $this->hasOne(StudentAcademicHistory::class);
+    }
+
+    public function assessmentHistories(): HasMany
+    {
+        return $this->hasMany(AssessmentHistory::class);
     }
 }

@@ -92,6 +92,10 @@ Route::prefix('registrar')->name('registrar.')->group(function () {
         Route::post('/api/student-fees/{studentId}/assign', [RegistrarStudentController::class, 'assignExistingFee'])->name('api.student.fees.assign');
         Route::delete('/api/student-fees/{studentFeeId}', [RegistrarStudentController::class, 'removeStudentFee'])->name('api.student.fees.remove');
 
+        // Assessment history routes
+        Route::get('/api/assessment-histories/{studentId}', [RegistrarStudentController::class, 'getAssessmentHistories'])->name('api.assessment-histories');
+        Route::delete('/api/assessment-histories/{id}', [RegistrarStudentController::class, 'deleteAssessmentHistory'])->name('api.assessment-histories.delete');
+
         Route::get('/api/levels-by-department/{departmentId}', [ProspectusController::class, 'getLevelsByDepartment'])->name('api.levels');
         Route::get('/api/curricula-by-department/{departmentId}', [ProspectusController::class, 'getCurriculaByDepartment'])->name('api.curricula');
         Route::get('/api/prospectuses', [ProspectusController::class, 'getProspectusesApi'])->name('api.prospectuses');
